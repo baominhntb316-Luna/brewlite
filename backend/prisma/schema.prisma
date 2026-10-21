@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  PREPARING
+  READY
+  COMPLETED
+  PAYMENT_FAILED
+  CANCELLED
+}
+
+enum Size {
+  S
+  M
+  L
+}
+
+enum PaymentMethod {
+  WALLET
+  CARD
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  passwordHash  String
+  loyaltyPoints Int      @default(0)
+  orders        Order[]
+  createdAt     DateTime @default(now())
+}
+
+model Product {
+  id         Int         @id @default(autoincrement())
+  name       String
+  price      Int         // Đơn vị: VNĐ (VD: 35000)
+  imageUrl   String
+  stock      Int         @default(100)
+  version    Int         @default(1) // Phục vụ Optimistic Locking (Task 10.3)
+  orderItems OrderItem[]
+}
+
+model Order {
+  id         Int         @id @default(autoincrement())
+  userId     Int
+  user       User        @relation(fields: [userId], references: [id])
+  status     OrderStatus @default(PENDING)
+  total      Int
+  discount   Int         @default(0)
+  couponCode String?
+  createdAt  DateTime    @default(now())
+  items      OrderItem[]
+  payments   Payment[]
+}
+
+model OrderItem {
+  id        Int      @id @default(autoincrement())
+  orderId   Int
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id])
+  size      Size     @default(M)
+  toppings  String[] // Lưu danh sách topping: ["Trân châu", "Kem"]
+  qty       Int
+  lineTotal Int
+}
+
+model Payment {
+  id             Int           @id @default(autoincrement())
+  orderId        Int
+  order          Order         @relation(fields: [orderId], references: [id])
+  idempotencyKey String        @unique // Đảm bảo Idempotent (Task 10.2)
+  amount         Int
+  method         PaymentMethod
+  status         String        // SUCCESS | FAILED
+  createdAt      DateTime      @default(now())
+}
