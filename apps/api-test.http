@@ -1,0 +1,90 @@
+@baseUrl = http://localhost:3001
+@idempotencyKey = payment-key-demo-001
+
+### 1. Lấy danh sách Menu đồ uống (Task 2)
+GET {{baseUrl}}/products
+Accept: application/json
+
+### 2. Xem chi tiết 1 sản phẩm (Mục 12.1)
+# Lưu ý: Thay số 1 bằng ID thực tế trả về từ API số 1
+GET {{baseUrl}}/products/1
+Accept: application/json
+
+### 3. Đăng ký tài khoản mới (Task 7)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "lean2504vn3@gmail.com",
+  "password": "0395613764an"
+}
+
+### 4. Đăng nhập & Tự động lấy JWT Token (Task 7)
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "khachhang@sgu.edu.vn",
+  "password": "password123"
+}
+
+### Biến tự động hứng Token từ bước 4 (Không cần copy-paste thủ công)
+@authToken = {{login.response.body.accessToken}}
+
+### 5. Tạo đơn hàng mới + Áp mã giảm giá 10% (Task 6 & Task 10.4)
+# Lưu ý: Kiểm tra productId (VD: 1, 2) khớp với id khi gọi GET /products
+# @name createOrder
+POST {{baseUrl}}/orders
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "productId": 1,
+      "size": "M",
+      "toppings": ["Kem"],
+      "qty": 1
+    },
+    {
+      "productId": 2,
+      "size": "L",
+      "toppings": ["Trân châu"],
+      "qty": 2
+    }
+  ],
+  "couponCode": "BREWLITE10"
+}
+
+### Biến tự động hứng Order ID vừa tạo ở bước 5
+@orderId = {{createOrder.response.body.id}}
+
+### 6. Thanh toán không tiền mặt - Ví điện tử (Task 8 & Task 10.2 Idempotent)
+# Bấm lần 1 -> idempotentReplay: false (Trạng thái đơn chuyển sang PAID, cộng điểm thưởng)
+# Bấm lần 2 -> idempotentReplay: true (Chặn thanh toán trùng!)
+POST {{baseUrl}}/payments
+Authorization: Bearer {{authToken}}
+Idempotency-Key: {{idempotencyKey}}
+Content-Type: application/json
+
+{
+  "orderId": {{orderId}},
+  "method": "WALLET",
+  "simulateFailure": false
+}
+
+### 7. Chuyển trạng thái đơn hàng theo State Machine (Task 10.1)
+# Đang ở PAID -> chuyển sang PREPARING (Hợp lệ)
+# Thử sửa chữ "PREPARING" thành "COMPLETED" rồi bấm gửi -> Sẽ thấy lỗi 400 chặn chuyển trạng thái sai!
+PATCH {{baseUrl}}/orders/{{orderId}}/status
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "status": "PREPARING"
+}
+
+### 8. Xem lịch sử đơn hàng của tôi (Task 9)
+GET {{baseUrl}}/orders/me
+Authorization: Bearer {{authToken}}

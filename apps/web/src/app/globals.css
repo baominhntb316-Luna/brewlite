@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+:root {
+  --background: #FAF7F2;
+  --foreground: #1C1917;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+/* Ép toàn bộ các khung nhập dữ liệu (input) hiển thị màu chữ đậm khi gõ 
+   và màu chữ ẩn mờ vừa phải khi chưa điền gì */
+input,
+textarea,
+select {
+  color: #1C1917 !important; /* Màu chữ đen đậm rõ nét khi người dùng gõ vào */
+  background-color: #FFFFFF;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #9CA3AF !important; /* Màu xám dịu cho dòng chữ ẩn mờ gợi ý */
+  opacity: 1 !important;
+  font-weight: 400;
+}
