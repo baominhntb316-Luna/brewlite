@@ -1,25 +1,28 @@
 import type { Metadata } from 'next';
+import { Be_Vietnam_Pro } from 'next/font/google';
 import './globals.css';
+import Navbar from '@/components/Navbar';
+import CartDrawer from '@/components/CartDrawer';
+
+// Nạp font Be Vietnam Pro hỗ trợ 100% tiếng Việt cực đẹp
+const beVietnamPro = Be_Vietnam_Pro({
+  subsets: ['vietnamese', 'latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
-  title: 'BrewLite Coffee - Cashless Ordering',
-  description: 'Ứng dụng đặt cà phê không tiền mặt tiện lợi và nhanh chóng',
+  title: 'BrewLite — Đặt Cà Phê Không Tiền Mặt',
+  description: 'Ứng dụng đặt và thanh toán đồ uống không dùng tiền mặt chỉ trong vài chạm.',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="vi">
-      <body className="antialiased selection:bg-amber-200">
-        <div className="min-h-screen bg-stone-100 flex flex-col items-center sm:py-6">
-          {/* Mobile-first frame container */}
-          <div className="w-full max-w-md min-h-screen sm:min-h-[844px] bg-white sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-stone-200/80">
-            {children}
-          </div>
-        </div>
+      <body className={`${beVietnamPro.className} min-h-screen bg-[#FAF7F2] text-stone-900 antialiased`}>
+        <Navbar />
+        <CartDrawer />
+        <main className="max-w-6xl mx-auto px-4 py-8">{children}</main>
       </body>
     </html>
   );
