@@ -99,6 +99,7 @@ export default function CheckoutPage() {
       setLoading(false);
     }
   };
+  
 
   const handlePayment = async () => {
     setLoading(true);
@@ -113,9 +114,12 @@ export default function CheckoutPage() {
         setPendingOrderId(order.id);
       }
 
-      // Mỗi lần gửi thanh toán sinh mới key nếu retry
-      const currentKey = `idem_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-      setIdempotencyKey(currentKey);
+      // D-09: Giữ nguyên Idempotency-Key cho cùng phiên thanh toán của đơn hàng (chống lặp do double-click / lag mạng)
+      let currentKey = idempotencyKey;
+      if (!currentKey) {
+        currentKey = `idem_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+        setIdempotencyKey(currentKey);
+      }
 
       // Bước 2: Gọi POST /payments kèm Idempotency-Key
       await api.payOrder(orderId, method, currentKey, simulateFail, token);
@@ -142,7 +146,9 @@ export default function CheckoutPage() {
     setModalLoading(true);
     setModalError('');
     try {
-      const retryKey = `idem_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      // Lượt thử thanh toán mới cho đơn đã thất bại sinh key retry mới
+      const retryKey = `idem_retry_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      setIdempotencyKey(retryKey);
       // Tự động bỏ cờ mô phỏng lỗi để thử lại thanh toán thành công
       setSimulateFail(false);
       await api.payOrder(pendingOrderId, method, retryKey, false, token);
