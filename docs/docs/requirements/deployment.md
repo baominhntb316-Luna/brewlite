@@ -3,7 +3,7 @@
 * **Dự án**: Hệ thống Đặt đồ uống trực tuyến BrewLite
 * **Môn học**: Công nghệ Phần mềm – Đại học Sài Gòn
 * **Phiên bản**: v2.0.0 (Release Assignment 2)
-* **Người thực hiện**: San (TV5 - Payment, Architecture & Deployment) & Nhóm BrewLite
+* **Người thực hiện**: San + Minh (TV5 - Payment, Architecture & Deployment) & Nhóm BrewLite
 
 ---
 
