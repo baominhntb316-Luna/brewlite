@@ -80,11 +80,10 @@ export default function ProductModal({ product, onClose }: Props) {
                     key={opt.value}
                     type="button"
                     onClick={() => setSize(opt.value)}
-                    className={`p-2.5 sm:p-3 rounded-2xl border text-left transition active:scale-95 ${
-                      active
+                    className={`p-2.5 sm:p-3 rounded-2xl border text-left transition active:scale-95 ${active
                         ? 'border-[#1B4332] bg-[#1B4332]/8 text-[#1B4332]'
                         : 'border-stone-200 hover:border-stone-300 text-stone-700'
-                    }`}
+                      }`}
                   >
                     <div className="font-bold text-xs sm:text-sm">Size {opt.value}</div>
                     <div className="text-[11px] sm:text-xs opacity-80 mt-0.5">
@@ -109,19 +108,17 @@ export default function ProductModal({ product, onClose }: Props) {
                     key={tp.id}
                     type="button"
                     onClick={() => toggleTopping(tp)}
-                    className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs sm:text-sm transition active:scale-98 ${
-                      checked
+                    className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs sm:text-sm transition active:scale-98 ${checked
                         ? 'border-[#1B4332] bg-[#1B4332]/5 font-semibold text-stone-900'
                         : 'border-stone-200 hover:border-stone-300 text-stone-700'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center gap-2.5">
                       <div
-                        className={`w-5 h-5 rounded-md flex items-center justify-center border transition ${
-                          checked
+                        className={`w-5 h-5 rounded-md flex items-center justify-center border transition ${checked
                             ? 'bg-[#1B4332] border-[#1B4332] text-white'
                             : 'border-stone-300'
-                        }`}
+                          }`}
                       >
                         {checked && <Check className="w-3.5 h-3.5" />}
                       </div>

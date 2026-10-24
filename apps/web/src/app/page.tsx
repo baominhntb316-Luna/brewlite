@@ -80,11 +80,10 @@ export default function HomePage() {
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-semibold whitespace-nowrap transition active:scale-95 ${
-                selectedCategory === cat.id
+              className={`px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-semibold whitespace-nowrap transition active:scale-95 ${selectedCategory === cat.id
                   ? 'bg-[#1B4332] text-white shadow-sm'
                   : 'bg-white text-stone-700 hover:bg-stone-100 border border-stone-200'
-              }`}
+                }`}
             >
               {cat.label}
             </button>

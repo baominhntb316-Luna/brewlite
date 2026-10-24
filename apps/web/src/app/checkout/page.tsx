@@ -99,7 +99,7 @@ export default function CheckoutPage() {
       setLoading(false);
     }
   };
-  
+
 
   const handlePayment = async () => {
     setLoading(true);
@@ -194,11 +194,10 @@ export default function CheckoutPage() {
             <button
               type="button"
               onClick={() => setMethod('WALLET')}
-              className={`w-full flex items-center justify-between p-4 rounded-2xl border text-left transition ${
-                method === 'WALLET'
+              className={`w-full flex items-center justify-between p-4 rounded-2xl border text-left transition ${method === 'WALLET'
                   ? 'border-[#1B4332] bg-[#1B4332]/5'
                   : 'border-stone-200 hover:border-stone-300'
-              }`}
+                }`}
             >
               <div className="flex items-center gap-3.5">
                 <div className="w-11 h-11 rounded-xl bg-pink-100 text-pink-700 flex items-center justify-center">
@@ -210,20 +209,18 @@ export default function CheckoutPage() {
                 </div>
               </div>
               <div
-                className={`w-5 h-5 rounded-full border-2 ${
-                  method === 'WALLET' ? 'border-[#1B4332] bg-[#1B4332]' : 'border-stone-300'
-                }`}
+                className={`w-5 h-5 rounded-full border-2 ${method === 'WALLET' ? 'border-[#1B4332] bg-[#1B4332]' : 'border-stone-300'
+                  }`}
               />
             </button>
 
             <button
               type="button"
               onClick={() => setMethod('CARD')}
-              className={`w-full flex items-center justify-between p-4 rounded-2xl border text-left transition ${
-                method === 'CARD'
+              className={`w-full flex items-center justify-between p-4 rounded-2xl border text-left transition ${method === 'CARD'
                   ? 'border-[#1B4332] bg-[#1B4332]/5'
                   : 'border-stone-200 hover:border-stone-300'
-              }`}
+                }`}
             >
               <div className="flex items-center gap-3.5">
                 <div className="w-11 h-11 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
@@ -235,9 +232,8 @@ export default function CheckoutPage() {
                 </div>
               </div>
               <div
-                className={`w-5 h-5 rounded-full border-2 ${
-                  method === 'CARD' ? 'border-[#1B4332] bg-[#1B4332]' : 'border-stone-300'
-                }`}
+                className={`w-5 h-5 rounded-full border-2 ${method === 'CARD' ? 'border-[#1B4332] bg-[#1B4332]' : 'border-stone-300'
+                  }`}
               />
             </button>
           </div>
@@ -421,8 +417,8 @@ export default function CheckoutPage() {
             {loading
               ? 'Đang xử lý giao dịch...'
               : pendingOrderId
-              ? `Thử lại thanh toán đơn #${pendingOrderId} (${formatVND(total)})`
-              : `Xác nhận trả ${formatVND(total)}`}
+                ? `Thử lại thanh toán đơn #${pendingOrderId} (${formatVND(total)})`
+                : `Xác nhận trả ${formatVND(total)}`}
           </button>
 
           <div className="flex items-center justify-center gap-1.5 text-[11px] text-stone-400">
