@@ -1,0 +1,45 @@
+@startuml state-order
+title Máy Trạng thái Đơn hàng BrewLite (Order State Machine) - TV6
+
+skinparam state {
+  BackgroundColor<<Initial>> LightYellow
+  BackgroundColor<<Terminal>> LightGreen
+  BackgroundColor<<Failed>> LightPink
+  BorderColor Gray
+  ArrowColor Black
+}
+
+[*] --> PENDING : Khởi tạo đơn (POST /orders)
+
+PENDING --> PAID : Thanh toán thành công (Gateway SUCCESS)
+PENDING --> PAYMENT_FAILED : Thanh toán lỗi (Gateway FAILURE)
+PENDING --> CANCELLED : Khách hủy đơn trước thanh toán
+
+PAYMENT_FAILED --> PENDING : Thử lại thanh toán (Retry)
+PAYMENT_FAILED --> CANCELLED : Khách hủy đơn sau khi lỗi thanh toán
+
+PAID --> PREPARING : Barista nhận đơn & bắt đầu pha chế (PATCH /orders/:id/status)
+PREPARING --> READY : Hoàn tất pha chế, chờ khách nhận
+READY --> COMPLETED : Giao đồ uống cho khách tại quầy (Hoàn tất)
+
+COMPLETED --> [*] : Trạng thái kết thúc (Terminal State)
+CANCELLED --> [*] : Trạng thái kết thúc (Terminal State - Hoàn kho)
+
+note right of COMPLETED
+  Mọi chuyển tiếp sau COMPLETED
+  hoặc CANCELLED đều bị chặn bởi
+  assertTransition (HTTP 400).
+end note
+
+note bottom of PAID
+  Sau khi đạt trạng thái PAID:
+  - Cho phép tích điểm thưởng (Loyalty)
+  - Không cho phép nhảy cóc (PAID -> COMPLETED)
+end note
+
+note left of CANCELLED
+  Khi chuyển sang CANCELLED:
+  Hệ thống chạy transaction hoàn trả
+  số lượng tồn kho (stock) đã tạm giữ.
+end note
+@enduml

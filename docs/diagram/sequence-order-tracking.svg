@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1020 920" width="1020" height="920" style="background:#ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#2b5b84"/>
+    </marker>
+    <marker id="arrow-dash" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#546e7a"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#c62828"/>
+    </marker>
+  </defs>
+
+  <text x="510" y="30" font-size="18" font-weight="bold" text-anchor="middle" fill="#1e3d59">SƠ ĐỒ TUẦN TỰ: THEO DÕI ĐƠN HÀNG &amp; MÁY TRẠNG THÁI (TV6)</text>
+
+  <!-- Lifeline Headers -->
+  <!-- User -->
+  <rect x="35" y="55" width="110" height="45" rx="6" fill="#e3f2fd" stroke="#1976d2" stroke-width="1.5"/>
+  <text x="90" y="75" font-size="12" font-weight="bold" text-anchor="middle" fill="#0d47a1">Khách hàng</text>
+  <text x="90" y="90" font-size="10" text-anchor="middle" fill="#1976d2">Customer</text>
+  <line x1="90" y1="100" x2="90" y2="880" stroke="#b0bec5" stroke-width="1.5" stroke-dasharray="4"/>
+
+  <!-- Staff -->
+  <rect x="195" y="55" width="110" height="45" rx="6" fill="#e8f5e9" stroke="#388e3c" stroke-width="1.5"/>
+  <text x="250" y="75" font-size="12" font-weight="bold" text-anchor="middle" fill="#1b5e20">Barista / Staff</text>
+  <text x="250" y="90" font-size="10" text-anchor="middle" fill="#388e3c">Nhân viên quầy</text>
+  <line x1="250" y1="100" x2="250" y2="880" stroke="#b0bec5" stroke-width="1.5" stroke-dasharray="4"/>
+
+  <!-- FE -->
+  <rect x="355" y="55" width="120" height="45" rx="6" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="1.5"/>
+  <text x="415" y="75" font-size="12" font-weight="bold" text-anchor="middle" fill="#4a148c">Frontend</text>
+  <text x="415" y="90" font-size="10" text-anchor="middle" fill="#7b1fa2">Next.js PWA</text>
+  <line x1="415" y1="100" x2="415" y2="880" stroke="#b0bec5" stroke-width="1.5" stroke-dasharray="4"/>
+
+  <!-- API -->
+  <rect x="525" y="55" width="120" height="45" rx="6" fill="#fff3e0" stroke="#f57c00" stroke-width="1.5"/>
+  <text x="585" y="75" font-size="12" font-weight="bold" text-anchor="middle" fill="#e65100">NestJS API</text>
+  <text x="585" y="90" font-size="10" text-anchor="middle" fill="#f57c00">OrdersController</text>
+  <line x1="585" y1="100" x2="585" y2="880" stroke="#b0bec5" stroke-width="1.5" stroke-dasharray="4"/>
+
+  <!-- Service & FSM -->
+  <rect x="695" y="55" width="130" height="45" rx="6" fill="#e0f7fa" stroke="#0097a7" stroke-width="1.5"/>
+  <text x="760" y="75" font-size="12" font-weight="bold" text-anchor="middle" fill="#006064">OrdersService</text>
+  <text x="760" y="90" font-size="10" text-anchor="middle" fill="#0097a7">State Machine (FSM)</text>
+  <line x1="760" y1="100" x2="760" y2="880" stroke="#b0bec5" stroke-width="1.5" stroke-dasharray="4"/>
+
+  <!-- DB -->
+  <rect x="865" y="55" width="110" height="45" rx="6" fill="#fbe9e7" stroke="#d84315" stroke-width="1.5"/>
+  <text x="920" y="75" font-size="12" font-weight="bold" text-anchor="middle" fill="#bf360c">PostgreSQL</text>
+  <text x="920" y="90" font-size="10" text-anchor="middle" fill="#d84315">Prisma ORM</text>
+  <line x1="920" y1="100" x2="920" y2="880" stroke="#b0bec5" stroke-width="1.5" stroke-dasharray="4"/>
+
+  <!-- SECTION 1: GET /orders/me -->
+  <rect x="40" y="115" width="940" height="20" fill="#eceff1" rx="4"/>
+  <text x="50" y="130" font-size="11" font-weight="bold" fill="#37474f">1. Khách hàng Tra cứu Tiến độ Đơn hàng (GET /orders/me)</text>
+
+  <line x1="90" y1="155" x2="415" y2="155" stroke="#2b5b84" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="240" y="150" font-size="10" text-anchor="middle" fill="#1e3d59">1: Xem chi tiết đơn hàng (/orders/:id)</text>
+
+  <line x1="415" y1="180" x2="585" y2="180" stroke="#2b5b84" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="500" y="175" font-size="10" text-anchor="middle" fill="#1e3d59">2: GET /orders/me [Bearer JWT]</text>
+
+  <line x1="585" y1="205" x2="760" y2="205" stroke="#2b5b84" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="670" y="200" font-size="10" text-anchor="middle" fill="#1e3d59">3: getMyOrders(userId)</text>
+
+  <line x1="760" y1="225" x2="920" y2="225" stroke="#2b5b84" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="840" y="220" font-size="10" text-anchor="middle" fill="#1e3d59">4: findMany(order + items)</text>
+
+  <line x1="920" y1="245" x2="760" y2="245" stroke="#546e7a" stroke-width="1.5" stroke-dasharray="3" marker-end="url(#arrow-dash)"/>
+  <text x="840" y="240" font-size="10" text-anchor="middle" fill="#546e7a">5: Danh sách đơn hàng</text>
+
+  <line x1="760" y1="265" x2="415" y2="265" stroke="#546e7a" stroke-width="1.5" stroke-dasharray="3" marker-end="url(#arrow-dash)"/>
+  <text x="585" y="260" font-size="10" text-anchor="middle" fill="#546e7a">6: 200 OK (Orders[] + status hiện tại)</text>
+
+  <line x1="415" y1="285" x2="90" y2="285" stroke="#546e7a" stroke-width="1.5" stroke-dasharray="3" marker-end="url(#arrow-dash)"/>
+  <text x="240" y="280" font-size="10" text-anchor="middle" fill="#2e7d32">7: Hiển thị Order Stepper thời gian thực</text>
+
+  <!-- SECTION 2: PATCH /orders/:id/status (PREPARING) -->
+  <rect x="40" y="310" width="940" height="20" fill="#eceff1" rx="4"/>
+  <text x="50" y="325" font-size="11" font-weight="bold" fill="#37474f">2. Barista Nhận Đơn &amp; Chuyển Trạng Thái Pha Chế (PAID -&gt; PREPARING)</text>
+
+  <line x1="250" y1="350" x2="415" y2="350" stroke="#2b5b84" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="330" y="345" font-size="10" text-anchor="middle" fill="#1e3d59">8: Bấm "Bắt đầu pha chế"</text>
+
+  <line x1="415" y1="375" x2="585" y2="375" stroke="#2b5b84" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="500" y="370" font-size="10" text-anchor="middle" fill="#1e3d59">9: PATCH /orders/:id/status {status: PREPARING}</text>
+
+  <line x1="585" y1="400" x2="760" y2="400" stroke="#2b5b84" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="670" y="395" font-size="10" text-anchor="middle" fill="#1e3d59">10: assertTransition(PAID, PREPARING) -&gt; HỢP LỆ</text>
+
+  <line x1="760" y1="425" x2="920" y2="425" stroke="#2b5b84" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="840" y="420" font-size="10" text-anchor="middle" fill="#1e3d59">11: update status = PREPARING</text>
+
+  <line x1="920" y1="445" x2="415" y2="445" stroke="#546e7a" stroke-width="1.5" stroke-dasharray="3" marker-end="url(#arrow-dash)"/>
+  <text x="670" y="440" font-size="10" text-anchor="middle" fill="#546e7a">12: 200 OK (Đã cập nhật)</text>
+
+  <!-- SECTION 3: READY & COMPLETED -->
+  <rect x="40" y="470" width="940" height="20" fill="#eceff1" rx="4"/>
+  <text x="50" y="485" font-size="11" font-weight="bold" fill="#37474f">3. Pha Chế Xong &amp; Giao Đồ Uống Cho Khách (PREPARING -&gt; READY -&gt; COMPLETED)</text>
+
+  <line x1="250" y1="510" x2="585" y2="510" stroke="#2b5b84" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="415" y="505" font-size="10" text-anchor="middle" fill="#1e3d59">13: PATCH status = READY (assertTransition OK)</text>
+
+  <line x1="585" y1="535" x2="90" y2="535" stroke="#2e7d32" stroke-width="1.5" stroke-dasharray="3" marker-end="url(#arrow)"/>
+  <text x="330" y="530" font-size="10" text-anchor="middle" fill="#2e7d32">14: UI Khách: Thông báo Đồ uống đã sẵn sàng tại quầy!</text>
+
+  <line x1="250" y1="565" x2="585" y2="565" stroke="#2b5b84" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="415" y="560" font-size="10" text-anchor="middle" fill="#1e3d59">15: Giao nước: PATCH status = COMPLETED (Terminal State)</text>
+
+  <line x1="585" y1="590" x2="250" y2="590" stroke="#546e7a" stroke-width="1.5" stroke-dasharray="3" marker-end="url(#arrow-dash)"/>
+  <text x="415" y="585" font-size="10" text-anchor="middle" fill="#546e7a">16: 200 OK: Đơn hàng hoàn tất chu trình</text>
+
+  <!-- SECTION 4: EXCEPTION - INVALID TRANSITION -->
+  <rect x="40" y="615" width="940" height="20" fill="#ffebee" rx="4"/>
+  <text x="50" y="630" font-size="11" font-weight="bold" fill="#c62828">4. Ngoại lệ: Vi phạm Chuyển tiếp Máy Trạng thái (Ví dụ: COMPLETED -&gt; PREPARING)</text>
+
+  <line x1="250" y1="655" x2="585" y2="655" stroke="#c62828" stroke-width="1.5" marker-end="url(#arrow-red)"/>
+  <text x="415" y="650" font-size="10" text-anchor="middle" fill="#c62828">17: PATCH status = PREPARING</text>
+
+  <line x1="585" y1="675" x2="760" y2="675" stroke="#c62828" stroke-width="1.5" marker-end="url(#arrow-red)"/>
+  <text x="670" y="670" font-size="10" text-anchor="middle" fill="#c62828">18: assertTransition ném BadRequestException</text>
+
+  <line x1="585" y1="695" x2="250" y2="695" stroke="#c62828" stroke-width="1.5" stroke-dasharray="3" marker-end="url(#arrow-red)"/>
+  <text x="415" y="690" font-size="10" text-anchor="middle" fill="#c62828">19: HTTP 400 Bad Request (DB giữ nguyên trạng thái)</text>
+
+  <!-- SECTION 5: CANCEL & RESTOCK -->
+  <rect x="40" y="725" width="940" height="20" fill="#fff8e1" rx="4"/>
+  <text x="50" y="740" font-size="11" font-weight="bold" fill="#f57f17">5. Luồng Hủy Đơn &amp; Hoàn Trả Tồn Kho (PENDING / PAYMENT_FAILED -&gt; CANCELLED)</text>
+
+  <line x1="90" y1="765" x2="585" y2="765" stroke="#e65100" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="330" y="760" font-size="10" text-anchor="middle" fill="#e65100">20: PATCH status = CANCELLED</text>
+
+  <line x1="585" y1="790" x2="760" y2="790" stroke="#e65100" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="670" y="785" font-size="10" text-anchor="middle" fill="#e65100">21: assertTransition OK -&gt; mở prisma.$transaction</text>
+
+  <line x1="760" y1="815" x2="920" y2="815" stroke="#e65100" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="840" y="810" font-size="10" text-anchor="middle" fill="#e65100">22: update status CANCELLED &amp; stock += qty</text>
+
+  <line x1="920" y1="835" x2="90" y2="835" stroke="#2e7d32" stroke-width="1.5" stroke-dasharray="3" marker-end="url(#arrow)"/>
+  <text x="500" y="830" font-size="10" text-anchor="middle" fill="#2e7d32">23: 200 OK: Đơn đã hủy an toàn, tồn kho đã hoàn lại</text>
+</svg>

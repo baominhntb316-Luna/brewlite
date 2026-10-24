@@ -1,0 +1,108 @@
+@startuml sequence-order-tracking
+autonumber
+title Sơ đồ Tuần tự: Theo dõi Đơn hàng & Cập nhật Trạng thái (Sequence Order Tracking) - TV6
+
+actor "Khách hàng\n(Customer)" as User
+actor "Nhân viên / Barista\n(Staff / Barista)" as Staff
+participant "Frontend\n(Next.js Web)" as FE
+participant "NestJS API\n(OrdersController)" as API
+participant "Service & FSM\n(OrdersService / FSM)" as Service
+database "PostgreSQL\n(Prisma ORM)" as DB
+
+== 1. Khách hàng Tra cứu Tiến độ Đơn hàng (GET /orders/me) ==
+User -> FE: Truy cập trang /orders hoặc /orders/:id
+activate FE
+FE -> API: GET /orders/me\n[Headers: Bearer <JWT>]
+activate API
+API -> API: JwtAuthGuard: Xác thực Bearer Token
+API -> Service: getMyOrders(userId)
+activate Service
+Service -> DB: prisma.order.findMany({\n  where: { userId },\n  include: { items, payments }\n})
+activate DB
+DB --> Service: Danh sách đơn hàng + Items + Payments
+deactivate DB
+Service --> API: Orders[]
+deactivate Service
+API --> FE: HTTP 200 OK (Danh sách đơn + Status hiện tại)
+deactivate API
+FE --> User: Hiển thị Order Stepper thời gian thực\n(Đã đặt -> Đã TT -> Pha chế -> Sẵn sàng -> Hoàn tất)
+deactivate FE
+
+== 2. Barista Cập nhật Trạng thái Pha chế (PATCH /orders/:id/status) ==
+Staff -> FE: Bấm "Bắt đầu pha chế" (status: PREPARING)
+activate FE
+FE -> API: PATCH /orders/:id/status\nBody: { "status": "PREPARING" }
+activate API
+API -> Service: updateOrderStatus(id, "PREPARING")
+activate Service
+Service -> Service: assertTransition(currentStatus, "PREPARING")\n[Kiểm tra: PAID -> PREPARING: Hợp lệ]
+Service -> DB: prisma.order.update({\n  where: { id },\n  data: { status: "PREPARING" }\n})
+activate DB
+DB --> Service: Order (status: PREPARING)
+deactivate DB
+Service --> API: Updated Order
+deactivate Service
+API --> FE: HTTP 200 OK
+deactivate API
+FE --> Staff: Cập nhật UI quầy: Đang pha chế
+deactivate FE
+
+== 3. Barista Hoàn tất Pha chế & Giao hàng (READY -> COMPLETED) ==
+Staff -> FE: Bấm "Đã pha xong" (status: READY)
+activate FE
+FE -> API: PATCH /orders/:id/status\nBody: { "status": "READY" }
+activate API
+API -> Service: assertTransition("PREPARING", "READY") -> Hợp lệ
+API -> DB: Cập nhật status = READY
+DB --> API: Success
+API --> FE: HTTP 200 OK (status: READY)
+deactivate API
+FE --> User: Thông báo: Đồ uống sẵn sàng nhận tại quầy!
+deactivate FE
+
+Staff -> FE: Giao nước & Bấm "Hoàn tất" (status: COMPLETED)
+activate FE
+FE -> API: PATCH /orders/:id/status\nBody: { "status": "COMPLETED" }
+activate API
+API -> Service: assertTransition("READY", "COMPLETED") -> Hợp lệ (Terminal)
+API -> DB: Cập nhật status = COMPLETED
+DB --> API: Success
+API --> FE: HTTP 200 OK (status: COMPLETED)
+deactivate API
+FE --> Staff: Đơn hàng hoàn tất
+deactivate FE
+
+== 4. Ngoại lệ: Vi phạm Chuyển tiếp Máy Trạng thái (Invalid Transition) ==
+Staff -> FE: Gửi lệnh chuyển sai (VD: COMPLETED -> PREPARING)
+activate FE
+FE -> API: PATCH /orders/:id/status\nBody: { "status": "PREPARING" }
+activate API
+API -> Service: assertTransition("COMPLETED", "PREPARING")
+activate Service
+Service --> API: Throws BadRequestException("Invalid state transition...")
+deactivate Service
+API --> FE: HTTP 400 Bad Request
+deactivate API
+FE --> Staff: Báo lỗi vi phạm luồng trạng thái
+deactivate FE
+
+== 5. Ngoại lệ: Hủy đơn hàng & Hoàn trả Tồn kho (Cancel & Restock) ==
+User -> FE: Bấm "Hủy đơn" (Khi đơn đang PENDING / PAYMENT_FAILED)
+activate FE
+FE -> API: PATCH /orders/:id/status\nBody: { "status": "CANCELLED" }
+activate API
+API -> Service: cancelOrder(id)
+activate Service
+Service -> Service: assertTransition(status, "CANCELLED") -> Hợp lệ
+Service -> DB: prisma.$transaction([\n  order.update({ status: CANCELLED }),\n  product.update({ stock: increment(qty) })\n])
+activate DB
+DB --> Service: Transaction Committed
+deactivate DB
+Service --> API: Cancelled & Stock Restocked
+deactivate Service
+API --> FE: HTTP 200 OK (status: CANCELLED)
+deactivate API
+FE --> User: Hiển thị Đơn đã hủy & Tồn kho đã hoàn lại
+deactivate FE
+
+@enduml
