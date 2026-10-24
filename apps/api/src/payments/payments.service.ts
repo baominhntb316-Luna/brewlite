@@ -2,7 +2,7 @@ import { Injectable, BadRequestException, NotFoundException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { OrderStatus } from '@prisma/client';
-import { assertTransition } from '../order/order-state-machine';
+import { assertTransition } from '../orders/order-state-machine';
 
 @Injectable()
 export class PaymentsService {
@@ -20,6 +20,11 @@ export class PaymentsService {
     });
 
     if (existingPayment) {
+      // D-03: So khớp userId và orderId với bản ghi cũ
+      if (existingPayment.order.userId !== userId || existingPayment.orderId !== dto.orderId) {
+        throw new BadRequestException('Idempotency-Key không hợp lệ hoặc đã được sử dụng cho đơn hàng khác');
+      }
+
       return {
         message: 'Yêu cầu thanh toán lặp lại (Idempotent response)',
         payment: existingPayment,
@@ -40,7 +45,10 @@ export class PaymentsService {
         assertTransition(OrderStatus.PAYMENT_FAILED, OrderStatus.PENDING);
       }
 
-      const isSuccess = !dto.simulateFailure;
+      // D-08: Cờ simulateFailure chỉ cho phép bật khi không phải môi trường production
+      const isProduction = process.env.NODE_ENV === 'production';
+      const simulateFailure = isProduction ? false : !!dto.simulateFailure;
+      const isSuccess = !simulateFailure;
       const targetStatus = isSuccess ? OrderStatus.PAID : OrderStatus.PAYMENT_FAILED;
 
       // Kiểm tra hợp lệ chuyển trạng thái
