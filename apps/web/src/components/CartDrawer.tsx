@@ -20,7 +20,7 @@ export default function CartDrawer() {
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-xs">
-      <div className="bg-white w-full max-w-md h-full flex flex-col shadow-2xl">
+      <div className="bg-white w-full max-w-md h-full max-h-dvh flex flex-col shadow-2xl">
         <div className="p-5 border-b border-stone-100 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <ShoppingBag className="w-5 h-5 text-[#1B4332]" />
@@ -96,14 +96,14 @@ export default function CartDrawer() {
         </div>
 
         {items.length > 0 && (
-          <div className="p-5 border-t border-stone-100 bg-stone-50/60 space-y-4">
+          <div className="p-5 border-t border-stone-100 bg-stone-50/60 space-y-4 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
             <div className="flex items-center justify-between text-base">
               <span className="text-stone-600 font-medium">Tổng tạm tính</span>
               <span className="text-xl font-bold text-stone-900">{formatVND(subtotal)}</span>
             </div>
             <button
               onClick={handleCheckout}
-              className="w-full bg-[#1B4332] hover:bg-[#143325] text-white font-semibold py-3.5 px-5 rounded-2xl shadow-md flex items-center justify-center gap-2 transition"
+              className="w-full bg-[#1B4332] hover:bg-[#143325] active:scale-98 text-white font-semibold py-3.5 px-5 rounded-2xl shadow-md flex items-center justify-center gap-2 transition"
             >
               <span>Thanh toán ({formatVND(subtotal)})</span>
               <ArrowRight className="w-4 h-4" />

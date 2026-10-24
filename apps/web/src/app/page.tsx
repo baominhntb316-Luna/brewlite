@@ -50,19 +50,19 @@ export default function HomePage() {
   return (
     <div className="space-y-8">
       {/* Hero Banner */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1B4332] via-[#23533E] to-stone-900 text-white p-8 md:p-10 shadow-xl">
-        <div className="max-w-xl space-y-4 relative z-10">
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1B4332] via-[#23533E] to-stone-900 text-white p-5 sm:p-8 md:p-10 shadow-xl">
+        <div className="max-w-xl space-y-3 sm:space-y-4 relative z-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-amber-300 text-xs font-semibold">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Trải nghiệm Đặt Cà Phê Không Tiền Mặt</span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">
             Đặt món trong vài chạm, nhận nước ngay tại quầy.
           </h1>
-          <p className="text-stone-200 text-sm md:text-base">
+          <p className="text-stone-200 text-xs sm:text-sm md:text-base leading-relaxed">
             Không cần xếp hàng chờ đợi. Tùy chỉnh size, topping yêu thích và thanh toán nhanh qua Ví điện tử hoặc Thẻ ngân hàng.
           </p>
-          <div className="flex flex-wrap gap-4 pt-2 text-xs text-stone-200">
+          <div className="flex flex-wrap gap-3 sm:gap-4 pt-1 sm:pt-2 text-xs text-stone-200">
             <span className="flex items-center gap-1.5">
               <Clock className="w-4 h-4 text-amber-400" /> Pha chế trong 3-5 phút
             </span>
@@ -74,13 +74,13 @@ export default function HomePage() {
       </section>
 
       {/* Bộ lọc & Tìm kiếm */}
-      <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
-        <div className="flex gap-2 overflow-x-auto pb-1">
+      <div className="flex flex-col md:flex-row gap-3 sm:gap-4 items-stretch md:items-center justify-between">
+        <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
           {CATEGORIES.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`px-4 py-2.5 rounded-2xl text-sm font-semibold whitespace-nowrap transition ${
+              className={`px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-semibold whitespace-nowrap transition active:scale-95 ${
                 selectedCategory === cat.id
                   ? 'bg-[#1B4332] text-white shadow-sm'
                   : 'bg-white text-stone-700 hover:bg-stone-100 border border-stone-200'
@@ -105,7 +105,7 @@ export default function HomePage() {
 
       {/* Lưới Sản Phẩm (Loading / Error State / Empty State / Grid) */}
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {[1, 2, 3, 4, 5, 6].map((n) => (
             <div
               key={n}
@@ -123,7 +123,7 @@ export default function HomePage() {
           <p className="text-sm text-stone-500 max-w-md mx-auto">{error}</p>
           <button
             onClick={loadProducts}
-            className="inline-block px-5 py-2.5 bg-[#1B4332] text-white rounded-2xl text-sm font-semibold hover:bg-[#23533E] transition shadow-xs cursor-pointer"
+            className="inline-block px-5 py-2.5 bg-[#1B4332] text-white rounded-2xl text-sm font-semibold hover:bg-[#23533E] transition shadow-xs cursor-pointer active:scale-95"
           >
             Thử lại
           </button>
@@ -136,7 +136,7 @@ export default function HomePage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {filtered.map((product) => (
             <div
               key={product.id}

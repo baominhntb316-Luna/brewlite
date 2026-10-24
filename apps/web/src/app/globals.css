@@ -25,3 +25,22 @@ textarea::placeholder {
   opacity: 1 !important;
   font-weight: 400;
 }
+
+/* Chống tự động phóng to (Auto-zoom) khó chịu trên iOS Safari khi chạm vào ô nhập liệu */
+@media screen and (max-width: 768px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* Lớp tiện ích ẩn thanh cuộn thô trên mobile, hỗ trợ vuốt mượt mà */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}

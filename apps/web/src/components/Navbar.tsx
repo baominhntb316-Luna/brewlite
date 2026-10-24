@@ -25,24 +25,25 @@ export default function Navbar() {
           </div>
         </Link>
 
-        <nav className="flex items-center gap-3">
+        <nav className="flex items-center gap-1.5 sm:gap-3">
           {user && (
             <div className="hidden sm:flex items-center gap-1.5 bg-amber-100/80 text-amber-900 px-3 py-1.5 rounded-full text-xs font-semibold">
               <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-              <span>{user.loyaltyPoints} điểm thưởng</span>
+              <span>{user.loyaltyPoints} điểm</span>
             </div>
           )}
 
           <Link
             href="/orders"
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-stone-700 hover:bg-stone-200/60 transition"
+            title="Đơn hàng"
+            className="flex items-center gap-1.5 p-2 sm:px-3 sm:py-2 rounded-xl text-sm font-medium text-stone-700 hover:bg-stone-200/60 transition"
           >
             <History className="w-4 h-4" />
             <span className="hidden sm:inline">Đơn hàng</span>
           </Link>
 
           {user ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <span className="text-sm font-semibold text-stone-800 hidden md:inline">
                 Chào, {user.name}
               </span>
@@ -57,21 +58,23 @@ export default function Navbar() {
           ) : (
             <Link
               href="/login"
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold text-stone-800 hover:bg-stone-200/70 transition"
+              title="Đăng nhập"
+              className="flex items-center gap-1.5 p-2 sm:px-3.5 sm:py-2 rounded-xl text-sm font-semibold text-stone-800 hover:bg-stone-200/70 transition"
             >
               <UserIcon className="w-4 h-4" />
-              <span>Đăng nhập</span>
+              <span className="hidden sm:inline">Đăng nhập</span>
             </Link>
           )}
 
           <button
             onClick={openCart}
-            className="relative flex items-center gap-2 bg-[#1B4332] hover:bg-[#143325] text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition active:scale-95"
+            title="Giỏ hàng"
+            className="relative flex items-center gap-1.5 sm:gap-2 bg-[#1B4332] hover:bg-[#143325] text-white p-2.5 sm:px-4 sm:py-2.5 rounded-xl text-sm font-semibold shadow-sm transition active:scale-95"
           >
             <ShoppingBag className="w-4 h-4" />
-            <span>Giỏ hàng</span>
+            <span className="hidden sm:inline">Giỏ hàng</span>
             {count > 0 && (
-              <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-amber-400 text-stone-950">
+              <span className="px-1.5 sm:px-2 py-0.5 text-[11px] sm:text-xs font-bold rounded-full bg-amber-400 text-stone-950">
                 {count}
               </span>
             )}
