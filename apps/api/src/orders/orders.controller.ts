@@ -1,8 +1,8 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { OrderStatus } from '@prisma/client';
 
 @Controller('orders')
 @UseGuards(JwtAuthGuard)
@@ -21,9 +21,10 @@ export class OrdersController {
 
   @Patch(':id/status')
   updateStatus(
+    @Req() req: any,
     @Param('id', ParseIntPipe) id: number,
-    @Body('status') status: OrderStatus,
+    @Body() dto: UpdateOrderStatusDto,
   ) {
-    return this.ordersService.updateStatus(id, status);
+    return this.ordersService.updateStatus(id, dto.status, req.user?.userId, req.user?.role);
   }
 }

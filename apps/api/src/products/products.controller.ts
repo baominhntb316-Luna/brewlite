@@ -10,6 +10,11 @@ export class ProductsController {
     return this.productsService.findAll();
   }
 
+  @Get('options')
+  getPricingOptions() {
+    return this.productsService.getPricingOptions();
+  }
+
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.productsService.findOne(id);

@@ -93,9 +93,9 @@ export const useCartStore = create<CartState>()(
         const normalized = code.trim().toUpperCase();
         const found = PROMO_CODES[normalized];
         if (!found) {
-          return { success: false, message: 'Mã giảm giá không hợp lệ (Thử: BREWLITE10 hoặc SGU2026)' };
+          return { success: false, message: 'Mã giảm giá không hợp lệ (Thử: BREWLITE10, GIAM10K hoặc SGU2026)' };
         }
-        set({ promoCode: normalized, discountPercent: found.discountPercent });
+        set({ promoCode: normalized, discountPercent: found.discountPercent || 0 });
         return { success: true, message: `Áp dụng thành công: ${found.description}` };
       },
 
@@ -105,10 +105,15 @@ export const useCartStore = create<CartState>()(
 
       getSubtotal: () => get().items.reduce((sum, item) => sum + item.lineTotal, 0),
 
-      getDiscountAmount: () =>
-        Math.round((get().getSubtotal() * get().discountPercent) / 100),
+      getDiscountAmount: () => {
+        const promo = get().promoCode ? PROMO_CODES[get().promoCode!] : null;
+        if (promo?.discountAmount) {
+          return Math.min(get().getSubtotal(), promo.discountAmount);
+        }
+        return Math.round((get().getSubtotal() * get().discountPercent) / 100);
+      },
 
-      getFinalTotal: () => get().getSubtotal() - get().getDiscountAmount(),
+      getFinalTotal: () => Math.max(0, get().getSubtotal() - get().getDiscountAmount()),
     }),
     { name: 'brewlite-cart-storage' }
   )

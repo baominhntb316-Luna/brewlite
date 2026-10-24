@@ -61,6 +61,10 @@ cp .env.example .env
 ```
 *(Không cần tạo file `.env` riêng lẻ trong từng thư mục `apps/api` hay `apps/web`)*
 
+> ⚠️ **LƯU Ý QUAN TRỌNG VỀ BIẾN `NEXT_PUBLIC_USE_MOCK` (Phụ lục B - D-07):**
+> * Khi `NEXT_PUBLIC_USE_MOCK=true`, Frontend hoàn toàn tách biệt khỏi Backend, sử dụng dữ liệu mẫu và lưu trữ trạng thái đơn hàng tạm thời trong `localStorage`. Chế độ này **chỉ phục vụ mục đích kiểm thử/demo giao diện người dùng**.
+> * **Khi nghiệm thu luồng nghiệp vụ thực tế** (bao gồm kiểm thử State Machine, Concurrency Optimistic Locking, Thanh toán Idempotent và xác thực JWT qua PostgreSQL), bắt buộc phải cấu hình `NEXT_PUBLIC_USE_MOCK=false`.
+
 #### Bước 2: Khởi chạy Database
 ```bash
 docker compose up postgres -d

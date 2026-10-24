@@ -13,8 +13,12 @@ export const TOPPING_OPTIONS: Topping[] = [
   { id: 'tp-jelly', name: 'Thạch cà phê giòn', price: 8000 },
 ];
 
-export const PROMO_CODES: Record<string, { discountPercent: number; description: string }> = {
+export const PROMO_CODES: Record<
+  string,
+  { discountPercent?: number; discountAmount?: number; description: string }
+> = {
   BREWLITE10: { discountPercent: 10, description: 'Giảm 10% tổng hóa đơn' },
+  GIAM10K: { discountAmount: 10000, description: 'Giảm 10.000đ trực tiếp' },
   SGU2026: { discountPercent: 20, description: 'Ưu đãi ĐH Sài Gòn - Giảm 20%' },
 };
 

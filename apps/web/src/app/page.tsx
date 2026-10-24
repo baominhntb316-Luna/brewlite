@@ -17,15 +17,28 @@ const CATEGORIES = [
 export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [search, setSearch] = useState('');
   const [activeProduct, setActiveProduct] = useState<Product | null>(null);
 
-  useEffect(() => {
+  const loadProducts = () => {
+    setLoading(true);
+    setError(null);
     api
       .getProducts()
-      .then(setProducts)
+      .then((data) => {
+        setProducts(data);
+        setError(null);
+      })
+      .catch((err) => {
+        setError(err.message || 'Không thể tải danh sách đồ uống. Vui lòng kiểm tra kết nối API.');
+      })
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadProducts();
   }, []);
 
   const filtered = products.filter((p) => {
@@ -90,7 +103,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Lưới Sản Phẩm (Loading / Empty State / Grid) */}
+      {/* Lưới Sản Phẩm (Loading / Error State / Empty State / Grid) */}
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5, 6].map((n) => (
@@ -103,6 +116,17 @@ export default function HomePage() {
               <div className="h-8 bg-stone-200 rounded-xl" />
             </div>
           ))}
+        </div>
+      ) : error ? (
+        <div className="bg-white rounded-3xl p-10 text-center border border-red-200/80 shadow-xs space-y-3">
+          <p className="text-lg font-bold text-red-600">Không thể tải danh sách đồ uống</p>
+          <p className="text-sm text-stone-500 max-w-md mx-auto">{error}</p>
+          <button
+            onClick={loadProducts}
+            className="inline-block px-5 py-2.5 bg-[#1B4332] text-white rounded-2xl text-sm font-semibold hover:bg-[#23533E] transition shadow-xs cursor-pointer"
+          >
+            Thử lại
+          </button>
         </div>
       ) : filtered.length === 0 ? (
         <div className="bg-white rounded-3xl p-12 text-center border border-stone-200/70">

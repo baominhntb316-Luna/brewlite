@@ -1,0 +1,93 @@
+@startuml class-01-domain
+title Class-01 – Domain model BrewLite
+hide empty methods
+skinparam classAttributeIconSize 0
+
+enum Role {
+  CUSTOMER
+  BARISTA
+}
+enum Size {
+  S
+  M
+  L
+}
+enum OrderStatus {
+  PENDING
+  PAID
+  PREPARING
+  READY
+  COMPLETED
+  PAYMENT_FAILED
+  CANCELLED
+}
+enum PaymentMethod {
+  WALLET
+  CARD
+}
+enum PromotionType {
+  PERCENT
+  FIXED
+}
+
+class User {
+  +id: Int
+  +email: String {unique}
+  +passwordHash: String
+  +role: Role
+  +loyaltyPoints: Int
+}
+class Product {
+  +id: Int
+  +name: String
+  +price: Decimal
+  +imageUrl: String
+  +stock: Int
+  +version: Int
+}
+class Order {
+  +id: Int
+  +status: OrderStatus
+  +subtotal: Decimal
+  +discount: Decimal
+  +total: Decimal
+  +createdAt: DateTime
+}
+class OrderItem {
+  +id: Int
+  +size: Size
+  +toppings: String[]
+  +quantity: Int
+  +unitPrice: Decimal
+  +lineTotal: Decimal
+}
+class Payment {
+  +id: Int
+  +idempotencyKey: String {unique}
+  +amount: Decimal
+  +method: PaymentMethod
+  +createdAt: DateTime
+}
+class Promotion {
+  +id: Int
+  +code: String {unique}
+  +type: PromotionType
+  +value: Decimal
+  +validFrom: DateTime
+  +validTo: DateTime
+  +active: Boolean
+}
+class LoyaltyTransaction {
+  +id: Int
+  +points: Int
+  +createdAt: DateTime
+}
+
+User "1" -- "0..*" Order : đặt
+Order "1" *-- "1..*" OrderItem
+OrderItem "0..*" -- "1" Product : tham chiếu
+Order "0..*" -- "0..1" Promotion : áp dụng
+Order "1" -- "0..1" Payment : thanh toán bằng
+User "1" -- "0..*" LoyaltyTransaction : tích điểm
+Order "1" -- "0..1" LoyaltyTransaction : phát sinh
+@enduml

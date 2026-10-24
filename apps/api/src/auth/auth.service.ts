@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, BadRequestException, ConflictException, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -10,7 +10,7 @@ export class AuthService {
 
   async register(dto: AuthDto) {
     const exists = await this.prisma.user.findUnique({ where: { email: dto.email } });
-    if (exists) throw new BadRequestException('Email đã tồn tại');
+    if (exists) throw new ConflictException('Email đã tồn tại');
 
     const passwordHash = await bcrypt.hash(dto.password, 10);
     const user = await this.prisma.user.create({
