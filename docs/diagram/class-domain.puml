@@ -1,0 +1,147 @@
+@startuml class-domain
+title Class-01 – Domain model BrewLite
+
+' ===== Style: khớp với ảnh (nền trắng, viền xanh, header nhạt) =====
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam classAttributeFontName Consolas
+skinparam classAttributeFontSize 12
+skinparam classFontStyle bold
+skinparam classFontSize 14
+skinparam stereotypeFontStyle italic
+skinparam stereotypeFontSize 11
+skinparam ArrowColor #333333
+skinparam ArrowFontStyle italic
+skinparam ArrowThickness 1.3
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #3b5f87
+  BorderThickness 1.5
+  HeaderBackgroundColor #e8f1fb
+}
+skinparam linetype ortho
+skinparam nodesep 70
+skinparam ranksep 70
+hide circle
+hide empty members
+
+' ===== Hàng 1: User | Order | Promotion =====
+class User {
+  + id: Int
+  + email: String {unique}
+  + passwordHash: String
+  + role: Role
+  + loyaltyPoints: Int
+}
+
+class Order {
+  + id: Int
+  + status: OrderStatus
+  + subtotal: Decimal
+  + discount: Decimal
+  + total: Decimal
+  + createdAt: DateTime
+}
+
+class Promotion {
+  + id: Int
+  + code: String {unique}
+  + type: PromotionType
+  + value: Decimal
+  + validFrom: DateTime
+  + validTo: DateTime
+  + active: Boolean
+}
+
+' ===== Hàng 2: LoyaltyTransaction | OrderItem | Payment =====
+class LoyaltyTransaction {
+  + id: Int
+  + points: Int
+  + createdAt: DateTime
+}
+
+class OrderItem {
+  + id: Int
+  + size: Size
+  + toppings: String[]
+  + quantity: Int
+  + unitPrice: Decimal
+  + lineTotal: Decimal
+}
+
+class Payment {
+  + id: Int
+  + idempotencyKey: String {unique}
+  + amount: Decimal
+  + method: PaymentMethod
+  + createdAt: DateTime
+}
+
+' ===== Hàng 3: OrderStatus | Product | PaymentMethod =====
+class OrderStatus <<enumeration>> #fdf3e0 {
+  PENDING
+  PAID
+  PREPARING
+  READY
+  COMPLETED
+  PAYMENT_FAILED
+  CANCELLED
+}
+
+class Product {
+  + id: Int
+  + name: String
+  + price: Decimal
+  + imageUrl: String
+  + stock: Int
+  + version: Int
+}
+
+class PaymentMethod <<enumeration>> #fdf3e0 {
+  WALLET
+  CARD
+}
+
+' ===== Hàng 4: Role | Size | PromotionType =====
+class Role <<enumeration>> #fdf3e0 {
+  CUSTOMER
+  BARISTA
+}
+
+class Size <<enumeration>> #fdf3e0 {
+  S
+  M
+  L
+}
+
+class PromotionType <<enumeration>> #fdf3e0 {
+  PERCENT
+  FIXED
+}
+
+' ===== Cố định lưới 3 cột x 4 hàng bằng liên kết ẩn =====
+LoyaltyTransaction -[hidden]right- OrderItem
+OrderItem -[hidden]right- Payment
+
+OrderStatus -[hidden]right- Product
+Product -[hidden]right- PaymentMethod
+
+Role -[hidden]right- Size
+Size -[hidden]right- PromotionType
+
+OrderStatus -[hidden]down- Role
+Product -[hidden]down- Size
+PaymentMethod -[hidden]down- PromotionType
+
+' ===== Quan hệ (đúng bội số và nhãn như trong ảnh) =====
+User "1" -right- "0..*" Order : đặt
+Order "0..*" -right- "0..1" Promotion : áp dụng
+User "1" -down- "0..*" LoyaltyTransaction : tích điểm
+LoyaltyTransaction "0..1" -- "1" Order : phát sinh
+Order "1" *-down- "1..*" OrderItem
+Order "1" -- "0..1" Payment : thanh toán bằng
+OrderItem "0..*" -down- "1" Product : tham chiếu
+
+@enduml
