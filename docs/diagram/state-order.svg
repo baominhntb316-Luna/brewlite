@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 950 320" width="950" height="320" style="background:#ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#2b5b84"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#c0392b"/>
+    </marker>
+    <marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#e67e22"/>
+    </marker>
+  </defs>
+  <text x="475" y="35" font-size="18" font-weight="bold" text-anchor="middle" fill="#1e3d59">MÁY TRẠNG THÁI ĐƠN HÀNG BREWLITE (ORDER STATE MACHINE) - TV6</text>
+  
+  <!-- Start -->
+  <circle cx="50" cy="120" r="14" fill="#2b5b84"/>
+  <line x1="64" y1="120" x2="110" y2="120" stroke="#2b5b84" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="85" y="112" font-size="11" text-anchor="middle" fill="#555">tạo đơn</text>
+
+  <!-- PENDING -->
+  <rect x="110" y="95" width="120" height="50" rx="10" fill="#e1f5fe" stroke="#0288d1" stroke-width="2"/>
+  <text x="170" y="125" font-size="13" font-weight="bold" text-anchor="middle" fill="#01579b">PENDING</text>
+  <text x="170" y="140" font-size="10" text-anchor="middle" fill="#0288d1">chờ thanh toán</text>
+
+  <!-- PENDING to PAID -->
+  <line x1="230" y1="120" x2="300" y2="120" stroke="#2b5b84" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="265" y="112" font-size="11" text-anchor="middle" fill="#2e7d32">success</text>
+
+  <!-- PAID -->
+  <rect x="300" y="95" width="120" height="50" rx="10" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2"/>
+  <text x="360" y="125" font-size="13" font-weight="bold" text-anchor="middle" fill="#1b5e20">PAID</text>
+  <text x="360" y="140" font-size="10" text-anchor="middle" fill="#2e7d32">đã thanh toán</text>
+
+  <!-- PAID to PREPARING -->
+  <line x1="420" y1="120" x2="490" y2="120" stroke="#2b5b84" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="455" y="112" font-size="11" text-anchor="middle" fill="#555">nhận pha</text>
+
+  <!-- PREPARING -->
+  <rect x="490" y="95" width="130" height="50" rx="10" fill="#fff3e0" stroke="#ef6c00" stroke-width="2"/>
+  <text x="555" y="125" font-size="13" font-weight="bold" text-anchor="middle" fill="#e65100">PREPARING</text>
+  <text x="555" y="140" font-size="10" text-anchor="middle" fill="#ef6c00">đang pha chế</text>
+
+  <!-- PREPARING to READY -->
+  <line x1="620" y1="120" x2="690" y2="120" stroke="#2b5b84" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="655" y="112" font-size="11" text-anchor="middle" fill="#555">pha xong</text>
+
+  <!-- READY -->
+  <rect x="690" y="95" width="110" height="50" rx="10" fill="#e0f7fa" stroke="#00838f" stroke-width="2"/>
+  <text x="745" y="125" font-size="13" font-weight="bold" text-anchor="middle" fill="#006064">READY</text>
+  <text x="745" y="140" font-size="10" text-anchor="middle" fill="#00838f">sẵn sàng</text>
+
+  <!-- READY to COMPLETED -->
+  <line x1="800" y1="120" x2="850" y2="120" stroke="#2b5b84" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="825" y="112" font-size="11" text-anchor="middle" fill="#555">giao</text>
+
+  <!-- COMPLETED -->
+  <rect x="850" y="95" width="90" height="50" rx="10" fill="#ede7f6" stroke="#4527a0" stroke-width="2"/>
+  <text x="895" y="125" font-size="11" font-weight="bold" text-anchor="middle" fill="#311b92">COMPLETED</text>
+  <text x="895" y="140" font-size="9" text-anchor="middle" fill="#4527a0">hoàn tất (cuối)</text>
+
+  <!-- PENDING to PAYMENT_FAILED -->
+  <line x1="170" y1="145" x2="170" y2="220" stroke="#c0392b" stroke-width="2" marker-end="url(#arrow-red)"/>
+  <text x="180" y="185" font-size="11" fill="#c0392b">lỗi thanh toán</text>
+
+  <!-- PAYMENT_FAILED -->
+  <rect x="90" y="220" width="160" height="50" rx="10" fill="#ffebee" stroke="#c62828" stroke-width="2"/>
+  <text x="170" y="248" font-size="12" font-weight="bold" text-anchor="middle" fill="#b71c1c">PAYMENT_FAILED</text>
+  <text x="170" y="262" font-size="10" text-anchor="middle" fill="#c62828">thanh toán thất bại</text>
+
+  <!-- PAYMENT_FAILED retry to PENDING -->
+  <path d="M 130 220 C 100 185, 100 160, 130 145" fill="none" stroke="#e67e22" stroke-width="2" marker-end="url(#arrow-orange)"/>
+  <text x="85" y="185" font-size="11" fill="#e67e22">thử lại</text>
+
+  <!-- CANCELLED -->
+  <rect x="330" y="220" width="130" height="50" rx="10" fill="#eceff1" stroke="#455a64" stroke-width="2"/>
+  <text x="395" y="248" font-size="13" font-weight="bold" text-anchor="middle" fill="#263238">CANCELLED</text>
+  <text x="395" y="262" font-size="10" text-anchor="middle" fill="#455a64">hủy đơn &amp; hoàn kho</text>
+
+  <line x1="250" y1="245" x2="330" y2="245" stroke="#78909c" stroke-width="1.5" stroke-dasharray="4" marker-end="url(#arrow)"/>
+  <text x="290" y="238" font-size="10" text-anchor="middle" fill="#78909c">hủy</text>
+  <line x1="200" y1="145" x2="340" y2="220" stroke="#78909c" stroke-width="1.5" stroke-dasharray="4" marker-end="url(#arrow)"/>
+  <text x="280" y="175" font-size="10" text-anchor="middle" fill="#78909c">hủy trước TT</text>
+</svg>
