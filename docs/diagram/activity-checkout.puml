@@ -1,0 +1,79 @@
+@startuml activity-01-checkout-e2e
+title Activity-01 – Luồng end-to-end BrewLite (Xem menu → Tùy chọn → Giỏ hàng → Đặt đơn → Thanh toán → Theo dõi đơn)
+
+|Customer|
+start
+:Mở ứng dụng, xem menu;
+|Next.js UI|
+:Gọi GET /products;
+|NestJS API|
+:Truy vấn và trả về danh sách sản phẩm;
+|Next.js UI|
+:Hiển thị menu (loading / empty / error);
+|Customer|
+:Chọn sản phẩm, size và topping;
+|Next.js UI|
+:Hiển thị chi tiết, tính giá theo tùy chọn;
+|Customer|
+:Bấm "Thêm vào giỏ";
+
+repeat
+  |Next.js UI|
+  :Cập nhật giỏ hàng, tính tổng tiền;
+  |Customer|
+  :Bấm "Đặt đơn";
+  |Next.js UI|
+  if (Đã đăng nhập?) then (chưa đăng nhập)
+    :Điều hướng sang trang Đăng nhập / Đăng ký;
+    |Customer|
+    :Nhập thông tin đăng nhập / đăng ký;
+    |NestJS API|
+    :Xác thực, phát JWT;
+  else (đã đăng nhập)
+  endif
+  |Next.js UI|
+  :Gửi POST /orders kèm JWT;
+  |NestJS API|
+  :Kiểm tra JWT, validate dữ liệu;
+  backward:Thông báo hết hàng; Chỉnh lại giỏ hàng (sửa số lượng / xóa);
+repeat while (Hết hàng / không đủ tồn kho?) is (hết hàng) not (đủ hàng)
+
+|NestJS API|
+:Trong 1 transaction: trừ tồn kho, tạo Order PENDING;
+|Next.js UI|
+:Hiển thị màn hình thanh toán (mã đơn, tổng tiền);
+
+repeat
+  |Customer|
+  :Chọn Ví / Thẻ và xác nhận thanh toán;
+  |Next.js UI|
+  :Gửi POST /payments kèm Idempotency-Key;
+  |NestJS API|
+  :Gọi dịch vụ thanh toán;
+  |Payment Service|
+  :Xử lý giao dịch (mô phỏng);
+  if (Thanh toán thành công?) then (thành công)
+    |NestJS API|
+    :Lưu Payment, đơn → PAID, cộng điểm thưởng;
+    |Next.js UI|
+    :Hiển thị xác nhận: mã đơn, trạng thái PAID;
+    |Customer|
+    :Theo dõi đơn: xem lịch sử và trạng thái;
+    |Next.js UI|
+    :Gọi GET /orders/me, hiển thị trạng thái đơn;
+    stop
+  else (thất bại)
+    |NestJS API|
+    :Đơn → PAYMENT_FAILED, giữ nguyên giỏ hàng;
+    |Next.js UI|
+    :Thông báo lỗi thanh toán;
+  endif
+  |Customer|
+repeat while (Thử lại?) is (thử lại) not (hủy)
+
+|NestJS API|
+:Hủy đơn → CANCELLED;
+|Next.js UI|
+:Thông báo đã hủy đơn, giỏ hàng được giữ nguyên;
+stop
+@enduml

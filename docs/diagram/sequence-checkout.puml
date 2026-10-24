@@ -1,0 +1,140 @@
+@startuml
+autonumber
+
+' --- CẤU HÌNH KHOẢNG CÁCH VÀ GIAO DIỆN ---
+skinparam maxMessageSize 200
+skinparam defaultFontSize 14
+skinparam ParticipantPadding 40
+skinparam BoxPadding 20
+skinparam sequenceMessageAlign center
+
+skinparam sequence {
+  ParticipantBackgroundColor LightBlue
+  ParticipantBorderColor DarkBlue
+  ActorBackgroundColor LightGreen
+  DatabaseBackgroundColor Khaki
+}
+
+actor "Customer" as Customer
+participant "Next.js UI" as UI
+participant "NestJS API" as API
+database "Database\n(PostgreSQL)" as DB
+participant "Payment Service\n(Mock)" as Payment
+
+== 1. Giai đoạn Tạo đơn hàng (Checkout) ==
+|||
+
+Customer -> UI : Nhấn nút "Thanh toán" tại giỏ hàng
+activate UI
+||25||
+
+UI -> API : POST /orders\n(Headers: Authorization JWT | Body: Giỏ hàng)
+activate API
+||25||
+
+API -> API : Xác thực Token JWT & Trích xuất userId
+||10||
+API -> API : Validate dữ liệu (Giỏ không rỗng, qty > 0)
+||25||
+
+group Database Transaction [Chống Overbooking]
+    API -> DB : BEGIN TRANSACTION
+    activate DB
+    ||15||
+    
+    API -> DB : UPDATE Inventory SET stock = stock - qty WHERE stock >= qty
+    DB --> API : Kết quả (Thành công / Hết hàng)
+    ||15||
+    
+    API -> DB : Truy vấn giá gốc & Tính tổng tiền (total)
+    ||10||
+    API -> DB : INSERT Order (status: PENDING)
+    ||15||
+    
+    DB --> API : COMMIT TRANSACTION
+    deactivate DB
+end
+||25||
+
+API --> UI : 201 Created (orderId, status, total)
+deactivate API
+||25||
+
+UI --> Customer : Hiển thị màn hình Chọn phương thức thanh toán
+deactivate UI
+||40||
+
+== 2. Giai đoạn Thanh toán (Payment) ==
+|||
+
+Customer -> UI : Chọn phương thức (Ví/Thẻ) & Nhấn "Xác nhận"
+activate UI
+||25||
+
+UI -> API : POST /payments\n(Body: orderId, method | Header: Idempotency-Key)
+activate API
+||25||
+
+API -> DB : SELECT Order (Kiểm tra quyền sở hữu & status=PENDING)
+activate DB
+DB --> API : Đơn hàng hợp lệ
+deactivate DB
+||25||
+
+alt Kiểm tra Idempotency [Request trùng lặp]
+    ||15||
+    API -> DB : Tra cứu Idempotency-Key
+    activate DB
+    DB --> API : Đã tồn tại giao dịch trước đó
+    deactivate DB
+    ||15||
+    API --> UI : 200 OK (Trả về kết quả cũ, bỏ qua gọi Gateway)
+    ||15||
+    
+else Request mới hợp lệ
+    ||15||
+    API -> Payment : Gửi request thanh toán (amount, method)
+    activate Payment
+    Payment --> API : Phản hồi từ Gateway (Thành công / Lỗi)
+    deactivate Payment
+    ||25||
+
+    alt Thanh toán Thành công
+        ||15||
+        group Database Transaction [Hoàn tất Đơn hàng]
+            API -> DB : BEGIN TRANSACTION
+            activate DB
+            ||15||
+            API -> DB : INSERT Payment record
+            ||10||
+            API -> DB : UPDATE Order SET status = PAID
+            ||10||
+            API -> DB : INSERT LoyaltyTransaction (Cộng điểm thưởng)
+            ||15||
+            DB --> API : COMMIT TRANSACTION
+            deactivate DB
+        end
+        ||20||
+        API --> UI : 200 OK (Thanh toán thành công)
+        ||15||
+        UI --> Customer : Xóa giỏ hàng, hiển thị mã đơn (#orderId) & trạng thái PAID
+        ||15||
+        
+    else Thanh toán Thất bại
+        ||15||
+        API -> DB : UPDATE Order SET status = PAYMENT_FAILED
+        activate DB
+        DB --> API : Cập nhật thành công
+        deactivate DB
+        ||20||
+        API --> UI : 400 Bad Request (Lỗi từ cổng thanh toán)
+        ||15||
+        UI --> Customer : Hiển thị thông báo lỗi & Hiển thị nút "Thử lại"
+        ||15||
+    end
+end
+
+deactivate API
+deactivate UI
+
+@enduml
