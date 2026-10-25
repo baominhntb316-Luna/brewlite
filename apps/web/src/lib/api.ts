@@ -1,5 +1,5 @@
 import { MOCK_PRODUCTS } from './mock-data';
-import { CartItem, Order, PaymentMethod, Product } from '@/types';
+import { CartItem, Order, OrderStatus, PaymentMethod, Product } from '@/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
@@ -189,7 +189,11 @@ export const api = {
         : err.message || 'Thanh toán thất bại';
       throw new Error(msg);
     }
-    return res.json();
+    const payResult = await res.json();
+    if (payResult.order && payResult.order.status === 'PAYMENT_FAILED') {
+      throw new Error('Giao dịch thanh toán bị từ chối. Đơn chuyển sang PAYMENT_FAILED.');
+    }
+    return payResult;
   },
 
   // Task 9: Lấy chi tiết đơn và lịch sử đơn hàng (/orders/me)
@@ -202,6 +206,41 @@ export const api = {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) throw new Error('Không thể tải lịch sử đơn hàng');
+    return res.json();
+  },
+
+  // Task 10: Chuyển trạng thái đơn hàng (ví dụ: CANCELLED để hoàn kho)
+  async updateOrderStatus(
+    orderId: string | number,
+    status: OrderStatus,
+    token: string,
+  ): Promise<any> {
+    if (USE_MOCK) {
+      await new Promise((r) => setTimeout(r, 300));
+      const orders = getStoredOrders();
+      const idx = orders.findIndex((o) => String(o.id) === String(orderId));
+      if (idx === -1) throw new Error('Không tìm thấy đơn hàng');
+      orders[idx].status = status;
+      saveStoredOrders(orders);
+      return orders[idx];
+    }
+
+    const res = await fetch(`${API_URL}/orders/${orderId}/status`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ status }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      const msg = Array.isArray(err.message)
+        ? err.message.join(', ')
+        : err.message || 'Không thể cập nhật trạng thái đơn hàng';
+      throw new Error(msg);
+    }
     return res.json();
   },
 };
