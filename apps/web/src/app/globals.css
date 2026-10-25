@@ -1,21 +1,27 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 :root {
-  --foreground-rgb: 44, 24, 16;
-  --background-start-rgb: 253, 248, 246;
-  --background-end-rgb: 242, 232, 229;
+  --background: #FAF7F2;
+  --foreground: #1C1917;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
-  min-height: 100vh;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+/* Ép toàn bộ các khung nhập dữ liệu (input) hiển thị màu chữ đậm khi gõ 
+   và màu chữ ẩn mờ vừa phải khi chưa điền gì */
+input,
+textarea,
+select {
+  color: #1C1917 !important; /* Màu chữ đen đậm rõ nét khi người dùng gõ vào */
+  background-color: #FFFFFF;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #9CA3AF !important; /* Màu xám dịu cho dòng chữ ẩn mờ gợi ý */
+  opacity: 1 !important;
+  font-weight: 400;
 }
