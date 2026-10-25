@@ -1,0 +1,63 @@
+name: Continuous Integration (CI)
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  web:
+    name: Web Quality Gate (Next.js)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Install dependencies (clean)
+        run: npm ci
+
+      - name: Strict Quality Gate & Lint Check
+        run: |
+          echo "Checking code quality and lint rules..."
+          echo "::error file=apps/web/src/app/page.tsx,line=10::[Lint Error] Quality gate failed: Code styling and unresolved lint violations detected (Task 4.4 demo error)"
+          exit 1
+
+      - name: Production build
+        run: npm run build
+
+  api:
+    name: API Quality Gate (NestJS)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/api/package-lock.json
+
+      - name: Install dependencies (clean)
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Production build
+        run: npm run build
