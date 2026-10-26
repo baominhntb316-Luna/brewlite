@@ -7,6 +7,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  CUSTOMER
+  BARISTA
+  ADMIN
+}
+
 enum OrderStatus {
   PENDING
   PAID
@@ -28,13 +34,20 @@ enum PaymentMethod {
   CARD
 }
 
+enum PromotionType {
+  PERCENT
+  FIXED
+}
+
 model User {
-  id            Int      @id @default(autoincrement())
-  email         String   @unique
-  passwordHash  String
-  loyaltyPoints Int      @default(0)
-  orders        Order[]
-  createdAt     DateTime @default(now())
+  id                  Int                  @id @default(autoincrement())
+  email               String               @unique
+  passwordHash        String
+  role                Role                 @default(CUSTOMER)
+  loyaltyPoints       Int                  @default(0)
+  orders              Order[]
+  loyaltyTransactions LoyaltyTransaction[]
+  createdAt           DateTime             @default(now())
 }
 
 model Product {
@@ -48,16 +61,19 @@ model Product {
 }
 
 model Order {
-  id         Int         @id @default(autoincrement())
-  userId     Int
-  user       User        @relation(fields: [userId], references: [id])
-  status     OrderStatus @default(PENDING)
-  total      Int
-  discount   Int         @default(0)
-  couponCode String?
-  createdAt  DateTime    @default(now())
-  items      OrderItem[]
-  payments   Payment[]
+  id                  Int                  @id @default(autoincrement())
+  userId              Int
+  user                User                 @relation(fields: [userId], references: [id])
+  status              OrderStatus          @default(PENDING)
+  total               Int
+  discount            Int                  @default(0)
+  couponCode          String?
+  promotionId         Int?
+  promotion           Promotion?           @relation(fields: [promotionId], references: [id])
+  loyaltyTransactions LoyaltyTransaction[]
+  createdAt           DateTime             @default(now())
+  items               OrderItem[]
+  payments            Payment[]
 }
 
 model OrderItem {
@@ -81,4 +97,26 @@ model Payment {
   method         PaymentMethod
   status         String        // SUCCESS | FAILED
   createdAt      DateTime      @default(now())
+}
+
+model Promotion {
+  id        Int           @id @default(autoincrement())
+  code      String        @unique
+  type      PromotionType
+  value     Int           // Phần trăm hoặc số tiền VNĐ giảm
+  validFrom DateTime?
+  validTo   DateTime?
+  active    Boolean       @default(true)
+  orders    Order[]
+  createdAt DateTime      @default(now())
+}
+
+model LoyaltyTransaction {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  orderId   Int?
+  order     Order?   @relation(fields: [orderId], references: [id])
+  points    Int
+  createdAt DateTime @default(now())
 }
