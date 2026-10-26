@@ -4,6 +4,14 @@ const nextConfig = {
   images: {
     domains: ['images.unsplash.com', 'localhost'],
   },
+  turbopack: {
+    rules: {
+      "*.css": {
+        loaders: ["@tailwindcss/turbopack"],
+        as: "*.css",
+      },
+    },
+  },
 };
 
 module.exports = nextConfig;
