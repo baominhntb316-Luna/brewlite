@@ -2,7 +2,7 @@ import { Injectable, BadRequestException, NotFoundException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { OrderStatus } from '@prisma/client';
-import { assertTransition } from '../orders/order-state-machine';
+import { assertTransition } from '../order/order-state-machine';
 
 @Injectable()
 export class PaymentsService {
