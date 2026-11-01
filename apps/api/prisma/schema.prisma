@@ -50,6 +50,14 @@ model User {
   createdAt           DateTime             @default(now())
 }
 
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique // Tên loại sản phẩm: "Cà phê", "Trà"
+  code      String    @unique // Mã loại sản phẩm: "COFFEE", "TEA"
+  products  Product[]
+  createdAt DateTime  @default(now())
+}
+
 model Product {
   id         Int         @id @default(autoincrement())
   name       String
@@ -57,6 +65,8 @@ model Product {
   imageUrl   String
   stock      Int         @default(100)
   version    Int         @default(1) // Phục vụ Optimistic Locking (Task 10.3)
+  categoryId Int?
+  category   Category?   @relation(fields: [categoryId], references: [id])
   orderItems OrderItem[]
 }
 

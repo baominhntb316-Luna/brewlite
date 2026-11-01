@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { Coffee, ShoppingBag, User as UserIcon, History, LogOut, Sparkles } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
@@ -7,13 +8,19 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter } from 'next/navigation';
 
 export default function Navbar() {
-  const { openCart, getTotalCount,clearCart } = useCartStore();
+  const { openCart, getTotalCount, loadUserCart } = useCartStore();
   const { user, logout } = useAuthStore();
   const count = getTotalCount();
   const router = useRouter();
 
+  // Đảm bảo khi user đăng nhập hoặc reload trang, giỏ hàng của user được tải đúng
+  useEffect(() => {
+    if (user) {
+      loadUserCart(user);
+    }
+  }, [user, loadUserCart]);
+
   const handleLogout = () => {
-    clearCart(); // Dọn dẹp giỏ hàng ngay lập tức
     logout();
     router.push('/');
   };

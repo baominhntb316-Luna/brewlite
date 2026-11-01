@@ -6,13 +6,25 @@ export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
   findAll() {
-    return this.prisma.product.findMany({ orderBy: { id: 'asc' } });
+    return this.prisma.product.findMany({
+      include: { category: true },
+      orderBy: { id: 'asc' },
+    });
   }
 
   async findOne(id: number) {
-    const product = await this.prisma.product.findUnique({ where: { id } });
+    const product = await this.prisma.product.findUnique({
+      where: { id },
+      include: { category: true },
+    });
     if (!product) throw new NotFoundException('Không tìm thấy sản phẩm');
     return product;
+  }
+
+  findAllCategories() {
+    return this.prisma.category.findMany({
+      orderBy: { id: 'asc' },
+    });
   }
 
   getPricingOptions() {
