@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState , useEffect} from 'react';
 import { X, Plus, Minus, Check } from 'lucide-react';
 import { DrinkSize, Product, Topping } from '@/types';
 import { SIZE_OPTIONS, TOPPING_OPTIONS, formatVND } from '@/lib/mock-data';
@@ -16,6 +16,13 @@ export default function ProductModal({ product, onClose }: Props) {
   const [selectedToppings, setSelectedToppings] = useState<Topping[]>([]);
   const [qty, setQty] = useState(1);
   const addItem = useCartStore((s) => s.addItem);
+  useEffect(() => {
+  if (product) {
+      setSize('M');
+      setSelectedToppings([]);
+      setQty(1);
+    }
+  }, [product]);
 
   if (!product) return null;
 
@@ -31,7 +38,12 @@ export default function ProductModal({ product, onClose }: Props) {
         : [...prev, topping]
     );
   };
-
+  const handleQtyChange = (val: string) => {
+    let num = parseInt(val) || 1;
+    if (num > product.stock) num = product.stock;
+    if (num < 1) num = 1;
+    setQty(num);
+  };
   const handleAddToCart = () => {
     addItem(product, size, selectedToppings, qty);
     onClose();
@@ -142,10 +154,17 @@ export default function ProductModal({ product, onClose }: Props) {
               >
                 <Minus className="w-4 h-4" />
               </button>
-              <span className="w-6 text-center font-bold text-stone-900">{qty}</span>
+              
+              <input
+                type="number"
+                value={qty}
+                onChange={(e) => handleQtyChange(e.target.value)}
+                className="w-10 text-center font-bold text-stone-900 bg-transparent focus:outline-none no-scrollbar"
+              />
+
               <button
                 type="button"
-                onClick={() => setQty(qty + 1)}
+                onClick={() => setQty(Math.min(product.stock, qty + 1))}
                 className="w-8 h-8 rounded-xl bg-white shadow-xs flex items-center justify-center text-stone-700 hover:bg-stone-50"
               >
                 <Plus className="w-4 h-4" />

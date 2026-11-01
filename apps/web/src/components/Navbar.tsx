@@ -4,11 +4,19 @@ import Link from 'next/link';
 import { Coffee, ShoppingBag, User as UserIcon, History, LogOut, Sparkles } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useRouter } from 'next/navigation';
 
 export default function Navbar() {
-  const { openCart, getTotalCount } = useCartStore();
+  const { openCart, getTotalCount,clearCart } = useCartStore();
   const { user, logout } = useAuthStore();
   const count = getTotalCount();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    clearCart(); // Dọn dẹp giỏ hàng ngay lập tức
+    logout();
+    router.push('/');
+  };
 
   return (
     <header className="sticky top-0 z-40 backdrop-blur-md bg-[#FAF7F2]/85 border-b border-stone-200/80">
@@ -43,11 +51,14 @@ export default function Navbar() {
 
           {user ? (
             <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-stone-800 hidden md:inline">
-                Chào, {user.name}
-              </span>
+              <div className="hidden md:flex items-center gap-1.5 bg-stone-100 px-3 py-1.5 rounded-full">
+                <UserIcon className="w-4 h-4 text-[#1B4332]" />
+                <span className="text-sm font-semibold text-stone-800">
+                  Chào, {user.email.split('@')[0]}
+                </span>
+              </div>
               <button
-                onClick={logout}
+                onClick={handleLogout}
                 title="Đăng xuất"
                 className="p-2 rounded-xl text-stone-600 hover:bg-red-50 hover:text-red-600 transition"
               >

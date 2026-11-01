@@ -41,19 +41,19 @@ export default function LoginPage() {
         // Nếu backend trả về luôn accessToken & user sau khi đăng ký
         if (regRes?.accessToken && regRes?.user) {
           loginSuccess(regRes.user, regRes.accessToken);
-          router.push('/checkout');
+          router.push('/');
           return;
         }
 
         // Nếu backend chỉ trả về thông tin user vừa tạo -> tự động gọi tiếp login để lấy JWT
         const loginRes = await api.login(email, password);
         loginSuccess(loginRes.user, loginRes.accessToken);
-        router.push('/checkout');
+        router.push('/');
       } else {
         // 2. Gọi API Đăng nhập: POST /auth/login
         const res = await api.login(email, password);
         loginSuccess(res.user, res.accessToken);
-        router.push('/checkout');
+        router.push('/');
       }
     } catch (err: any) {
       setError(err.message || 'Có lỗi xảy ra, vui lòng thử lại');
