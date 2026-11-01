@@ -108,7 +108,7 @@ describe('Task 10 - Nghiệp vụ Backend Nâng cao', () => {
       });
 
       const order = await ordersService.createOrder(testUserId, {
-        items: [{ productId: prod.id, size: Size.M, qty: 2 }], // Tổng: 90.000đ -> Giảm 10% còn 81.000đ -> 8 điểm
+        items: [{ productId: prod.id, size: Size.S, qty: 2 }], // Tổng: 90.000đ -> Giảm 10% còn 81.000đ -> 8 điểm
         couponCode: 'BREWLITE10',
       });
 
