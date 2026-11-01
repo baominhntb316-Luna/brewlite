@@ -44,3 +44,13 @@ textarea::placeholder {
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
 }
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Ẩn spinner của input number trên Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
