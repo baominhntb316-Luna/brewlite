@@ -17,11 +17,18 @@ export interface Topping {
   price: number;
 }
 
-export interface Product {
-  id: string;
+export interface Category {
+  id: number;
   name: string;
-  description: string;
-  category: 'COFFEE' | 'TEA' | 'SIGNATURE' | 'PASTRY';
+  code: string;
+}
+
+export interface Product {
+  id: string | number;
+  name: string;
+  description?: string;
+  category?: Category | 'COFFEE' | 'TEA' | string;
+  categoryId?: number;
   price: number;
   imageUrl: string;
   stock: number;

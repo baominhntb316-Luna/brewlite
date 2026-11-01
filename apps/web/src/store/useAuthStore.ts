@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { User } from '@/types';
+import { useCartStore } from './useCartStore';
 
 interface AuthState {
   user: User | null;
@@ -12,11 +13,18 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       token: null,
-      loginSuccess: (user, token) => set({ user, token }),
-      logout: () => set({ user: null, token: null }),
+      loginSuccess: (user, token) => {
+        set({ user, token });
+        useCartStore.getState().loadUserCart(user);
+      },
+      logout: () => {
+        const currentUser = get().user;
+        useCartStore.getState().saveCurrentCartOnLogout(currentUser);
+        set({ user: null, token: null });
+      },
       addLoyaltyPoints: (points) =>
         set((state) => ({
           user: state.user
@@ -24,6 +32,13 @@ export const useAuthStore = create<AuthState>()(
             : null,
         })),
     }),
-    { name: 'brewlite-auth-storage' }
+    {
+      name: 'brewlite-auth-storage',
+      onRehydrateStorage: () => (state) => {
+        if (state?.user) {
+          useCartStore.getState().loadUserCart(state.user);
+        }
+      },
+    }
   )
 );

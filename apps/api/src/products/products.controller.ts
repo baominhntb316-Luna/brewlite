@@ -10,6 +10,11 @@ export class ProductsController {
     return this.productsService.findAll();
   }
 
+  @Get('categories')
+  findAllCategories() {
+    return this.productsService.findAllCategories();
+  }
+
   @Get('options')
   getPricingOptions() {
     return this.productsService.getPricingOptions();
