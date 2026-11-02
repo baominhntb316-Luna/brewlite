@@ -69,10 +69,15 @@ async function main() {
         },
       });
     } else {
-      // Nếu đã có rồi, cập nhật categoryId
+      // Nếu đã có rồi, cập nhật categoryId, imageUrl, price, stock
       await prisma.product.update({
         where: { id: existing.id },
-        data: { categoryId: categoryId },
+        data: {
+          categoryId: categoryId,
+          imageUrl: item.imageUrl,
+          price: item.price,
+          stock: item.stock,
+        },
       });
       // Xóa các bản ghi bị trùng tên (có id lớn hơn bản gốc) chưa gắn với đơn hàng
       await prisma.product.deleteMany({
