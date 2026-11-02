@@ -15,6 +15,70 @@ describe('Task 10 - Nghiệp vụ Backend Nâng cao', () => {
   let testUserId: number;
   let limitedProductId: number;
 
+  const testProductIds: number[] = [];
+  const testUserIds: number[] = [];
+
+  // Hàm dọn dẹp độc lập dữ liệu test của Task 10, tuyệt đối KHÔNG đụng đến dữ liệu thật của dự án
+  const cleanupTestData = async () => {
+    try {
+      // 1. Thu thập ID người dùng test
+      const testUsers = await prisma.user.findMany({
+        where: {
+          OR: [
+            { id: { in: testUserIds } },
+            { email: { in: ['tester@brewlite.vn', 'task10-tester@brewlite.vn'] } },
+          ],
+        },
+        select: { id: true },
+      });
+      const userIds = testUsers.map((u) => u.id);
+
+      // 2. Thu thập ID sản phẩm test
+      const testProducts = await prisma.product.findMany({
+        where: {
+          OR: [
+            { id: { in: testProductIds } },
+            { name: { in: ['Cold Brew Giới Hạn', 'Matcha Latte', 'Test Cappuccino Task10'] } },
+            { imageUrl: { in: ['cap.jpg', 'img.jpg', 'matcha.jpg'] } },
+          ],
+        },
+        select: { id: true },
+      });
+      const prodIds = testProducts.map((p) => p.id);
+
+      // 3. Tìm và xóa các đơn hàng và thanh toán test
+      const testOrders = await prisma.order.findMany({
+        where: {
+          OR: [
+            { userId: { in: userIds } },
+            { items: { some: { productId: { in: prodIds } } } },
+          ],
+        },
+        select: { id: true },
+      });
+      const orderIds = testOrders.map((o) => o.id);
+
+      if (orderIds.length > 0) {
+        await prisma.payment.deleteMany({ where: { orderId: { in: orderIds } } });
+        await prisma.orderItem.deleteMany({ where: { orderId: { in: orderIds } } });
+        await prisma.order.deleteMany({ where: { id: { in: orderIds } } });
+      }
+
+      // 4. Xóa sản phẩm test
+      if (prodIds.length > 0) {
+        await prisma.orderItem.deleteMany({ where: { productId: { in: prodIds } } });
+        await prisma.product.deleteMany({ where: { id: { in: prodIds } } });
+      }
+
+      // 5. Xóa user test
+      if (userIds.length > 0) {
+        await prisma.user.deleteMany({ where: { id: { in: userIds } } });
+      }
+    } catch (err) {
+      console.warn('Cảnh báo khi dọn dẹp dữ liệu test Task 10:', err);
+    }
+  };
+
   beforeAll(async () => {
     app = await Test.createTestingModule({
       imports: [AppModule],
@@ -24,29 +88,30 @@ describe('Task 10 - Nghiệp vụ Backend Nâng cao', () => {
     ordersService = app.get<OrdersService>(OrdersService);
     paymentsService = app.get<PaymentsService>(PaymentsService);
 
-    // Đảm bảo kết nối DB sẵn sàng
     await prisma.$connect();
 
-    // Dọn dẹp và tạo dữ liệu test
-    await prisma.payment.deleteMany();
-    await prisma.orderItem.deleteMany();
-    await prisma.order.deleteMany();
-    await prisma.product.deleteMany();
-    await prisma.user.deleteMany();
+    // Dọn dẹp tàn dư (nếu có) từ lần chạy test trước đó
+    await cleanupTestData();
 
+    // Tạo user test riêng biệt cho Task 10
     const user = await prisma.user.create({
-      data: { email: 'tester@brewlite.vn', passwordHash: 'hashed_pw' },
+      data: { email: 'task10-tester@brewlite.vn', passwordHash: 'hashed_pw' },
     });
     testUserId = user.id;
+    testUserIds.push(user.id);
 
-    // Tạo sản phẩm chỉ còn đúng 1 ly trong kho để test Concurrency
+    // Tạo sản phẩm test riêng biệt cho Task 10
     const product = await prisma.product.create({
       data: { name: 'Cold Brew Giới Hạn', price: 50000, imageUrl: 'img.jpg', stock: 1 },
     });
     limitedProductId = product.id;
-  }, 30000); // Tăng timeout của beforeAll lên 30 giây
+    testProductIds.push(product.id);
+  }, 30000);
 
   afterAll(async () => {
+    // Tự động dọn dẹp toàn bộ dữ liệu test sau khi chạy xong
+    await cleanupTestData();
+
     if (prisma) {
       await prisma.$disconnect();
     }
@@ -74,6 +139,7 @@ describe('Task 10 - Nghiệp vụ Backend Nâng cao', () => {
       const prod = await prisma.product.create({
         data: { name: 'Matcha Latte', price: 40000, imageUrl: 'matcha.jpg', stock: 5 },
       });
+      testProductIds.push(prod.id);
 
       // Tạo đơn hàng mua 2 ly -> Tồn kho giảm từ 5 xuống 3
       const order = await ordersService.createOrder(testUserId, {
@@ -104,11 +170,12 @@ describe('Task 10 - Nghiệp vụ Backend Nâng cao', () => {
   describe('(b) Idempotent Payment & Loyalty Points', () => {
     it('Gửi 2 lần cùng Idempotency-Key chỉ xử lý thanh toán và cộng điểm 1 lần duy nhất', async () => {
       const prod = await prisma.product.create({
-        data: { name: 'Cappuccino', price: 45000, imageUrl: 'cap.jpg', stock: 10 },
+        data: { name: 'Test Cappuccino Task10', price: 45000, imageUrl: 'cap.jpg', stock: 10 },
       });
+      testProductIds.push(prod.id);
 
       const order = await ordersService.createOrder(testUserId, {
-        items: [{ productId: prod.id, size: Size.M, qty: 2 }], // Tổng: 90.000đ -> Giảm 10% còn 81.000đ -> 8 điểm
+        items: [{ productId: prod.id, size: Size.S, qty: 2 }], // Tổng: 90.000đ -> Giảm 10% còn 81.000đ -> 8 điểm
         couponCode: 'BREWLITE10',
       });
 
