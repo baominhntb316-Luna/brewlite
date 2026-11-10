@@ -13,8 +13,12 @@ export const TOPPING_OPTIONS: Topping[] = [
   { id: 'tp-jelly', name: 'Thạch cà phê giòn', price: 8000 },
 ];
 
-export const PROMO_CODES: Record<string, { discountPercent: number; description: string }> = {
+export const PROMO_CODES: Record<
+  string,
+  { discountPercent?: number; discountAmount?: number; description: string }
+> = {
   BREWLITE10: { discountPercent: 10, description: 'Giảm 10% tổng hóa đơn' },
+  GIAM10K: { discountAmount: 10000, description: 'Giảm 10.000đ trực tiếp' },
   SGU2026: { discountPercent: 20, description: 'Ưu đãi ĐH Sài Gòn - Giảm 20%' },
 };
 
@@ -23,7 +27,7 @@ export const MOCK_PRODUCTS: Product[] = [
     id: 'prod-1',
     name: 'Cà Phê Sữa Đá Sài Gòn',
     description: 'Hạt Robusta rang đậm pha phin truyền thống kết hợp sữa đặc béo ngậy.',
-    category: 'COFFEE',
+    category: { id: 1, name: 'Cà phê', code: 'COFFEE' },
     price: 35000,
     imageUrl: '/ca-phe-sua.jpg',
     stock: 25,
@@ -33,7 +37,7 @@ export const MOCK_PRODUCTS: Product[] = [
     id: 'prod-2',
     name: 'Classic Americano Đá',
     description: '100% hạt Arabica Cầu Đất, vị chua thanh nhẹ và hậu vị ngọt sâu.',
-    category: 'COFFEE',
+    category: { id: 1, name: 'Cà phê', code: 'COFFEE' },
     price: 40000,
     imageUrl: '/americano.jpg',
     stock: 30,
@@ -42,7 +46,7 @@ export const MOCK_PRODUCTS: Product[] = [
     id: 'prod-3',
     name: 'Artisan Cappuccino',
     description: 'Sự cân bằng hoàn hảo giữa Espresso đậm đà và lớp bọt sữa mịn màng.',
-    category: 'COFFEE',
+    category: { id: 1, name: 'Cà phê', code: 'COFFEE' },
     price: 45000,
     imageUrl: '/cappuccino.jpg',
     stock: 18,
@@ -52,7 +56,7 @@ export const MOCK_PRODUCTS: Product[] = [
     id: 'prod-4',
     name: 'Trà Đào Cam Sả',
     description: 'Trà đen ủ lạnh hòa quyện cùng đào miếng giòn ngọt, cam vàng và hương sả.',
-    category: 'TEA',
+    category: { id: 2, name: 'Trà', code: 'TEA' },
     price: 39000,
     imageUrl: '/tra-dao.jpg',
     stock: 20,
@@ -62,17 +66,17 @@ export const MOCK_PRODUCTS: Product[] = [
     id: 'prod-5',
     name: 'Caramel Salt Cold Brew',
     description: 'Cà phê ủ lạnh 18 giờ êm mượt, phủ lớp kem muối biển caramel.',
-    category: 'SIGNATURE',
+    category: { id: 1, name: 'Cà phê', code: 'COFFEE' },
     price: 52000,
     imageUrl: '/ca-phe-sua.jpg',
     stock: 10,
-    badge: 'Signature',
+    badge: 'Cà phê',
   },
   {
     id: 'prod-6',
     name: 'Matcha Latte Uji Nhật Bản',
     description: 'Bột trà xanh Uji thượng hạng đánh bông cùng sữa tươi thanh trùng.',
-    category: 'TEA',
+    category: { id: 2, name: 'Trà', code: 'TEA' },
     price: 49000,
     imageUrl: '/tra-dao.jpg',
     stock: 15,

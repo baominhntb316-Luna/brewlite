@@ -8,10 +8,9 @@ import { formatVND } from '@/lib/mock-data';
 import ProductModal from '@/components/ProductModal';
 
 const CATEGORIES = [
-  { id: 'ALL', label: 'Tất cả món' },
-  { id: 'COFFEE', label: 'Cà phê Phin & Máy' },
-  { id: 'TEA', label: 'Trà Trái Cây & Matcha' },
-  { id: 'SIGNATURE', label: 'Signature Đặc Biệt' },
+  { id: 'ALL', label: 'Tất cả' },
+  { id: 'COFFEE', label: 'Cà phê' },
+  { id: 'TEA', label: 'Trà' },
 ];
 
 export default function HomePage() {
@@ -28,9 +27,36 @@ export default function HomePage() {
       .finally(() => setLoading(false));
   }, []);
 
+  const getProductCategory = (p: Product): { code: string; name: string } => {
+    if (typeof p.category === 'object' && p.category !== null) {
+      return {
+        code: p.category.code || (p.category.name.toLowerCase().includes('trà') ? 'TEA' : 'COFFEE'),
+        name: p.category.name,
+      };
+    }
+    if (typeof p.category === 'string') {
+      const isTea = p.category.toUpperCase() === 'TEA' || p.category.toLowerCase().includes('trà');
+      return {
+        code: isTea ? 'TEA' : 'COFFEE',
+        name: isTea ? 'Trà' : 'Cà phê',
+      };
+    }
+    // Fallback theo tên đồ uống
+    const isTea = p.name.toLowerCase().includes('trà') || p.name.toLowerCase().includes('matcha');
+    return {
+      code: isTea ? 'TEA' : 'COFFEE',
+      name: isTea ? 'Trà' : 'Cà phê',
+    };
+  };
+
   const filtered = products.filter((p) => {
-    const matchCat = selectedCategory === 'ALL' || p.category === selectedCategory;
-    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
+    const { code, name } = getProductCategory(p);
+    const matchCat =
+      selectedCategory === 'ALL' ||
+      code === selectedCategory;
+    const matchSearch =
+      p.name.toLowerCase().includes(search.toLowerCase()) ||
+      name.toLowerCase().includes(search.toLowerCase());
     return matchCat && matchSearch;
   });
 
@@ -60,16 +86,16 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Bộ lọc & Tìm kiếm */}
+      {/* Bộ lọc Danh mục & Tìm kiếm */}
       <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
         <div className="flex gap-2 overflow-x-auto pb-1">
           {CATEGORIES.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`px-4 py-2.5 rounded-2xl text-sm font-semibold whitespace-nowrap transition ${
+              className={`px-5 py-2.5 rounded-2xl text-sm font-bold whitespace-nowrap transition ${
                 selectedCategory === cat.id
-                  ? 'bg-[#1B4332] text-white shadow-sm'
+                  ? 'bg-[#1B4332] text-white shadow-md'
                   : 'bg-white text-stone-700 hover:bg-stone-100 border border-stone-200'
               }`}
             >
@@ -84,13 +110,13 @@ export default function HomePage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Tìm Cappuccino, Trà đào..."
+            placeholder="Tìm Cà phê, Trà đào..."
             className="w-full pl-10 pr-4 py-2.5 bg-white border border-stone-200 rounded-2xl text-sm focus:outline-none focus:border-[#1B4332]"
           />
         </div>
       </div>
 
-      {/* Lưới Sản Phẩm (Loading / Empty State / Grid) */}
+      {/* Lưới Sản Phẩm */}
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5, 6].map((n) => (
@@ -108,60 +134,68 @@ export default function HomePage() {
         <div className="bg-white rounded-3xl p-12 text-center border border-stone-200/70">
           <p className="text-lg font-bold text-stone-800">Không tìm thấy đồ uống phù hợp</p>
           <p className="text-sm text-stone-500 mt-1">
-            Thử tìm kiếm với từ khóa khác hoặc chọn danh mục Tất cả món.
+            Thử tìm kiếm với từ khóa khác hoặc chọn danh mục Tất cả.
           </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filtered.map((product) => (
-            <div
-              key={product.id}
-              onClick={() => setActiveProduct(product)}
-              className="group bg-white rounded-3xl p-4 border border-stone-200/70 hover:border-[#1B4332]/40 hover:shadow-xl transition cursor-pointer flex flex-col justify-between"
-            >
-              <div>
-                <div className="relative h-48 rounded-2xl overflow-hidden bg-stone-100">
-                  <img
-                    src={product.imageUrl}
-                    alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                  />
-                  {product.badge && (
-                    <span className="absolute top-3 left-3 bg-amber-400 text-stone-950 text-xs font-bold px-2.5 py-1 rounded-full shadow-xs">
-                      {product.badge}
-                    </span>
-                  )}
-                  <span className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-xs text-white text-[11px] px-2.5 py-0.5 rounded-full">
-                    Còn {product.stock} ly
-                  </span>
-                </div>
-
-                <div className="mt-4">
-                  <h3 className="font-bold text-lg text-stone-900 group-hover:text-[#1B4332] transition">
-                    {product.name}
-                  </h3>
-                  <p className="text-xs text-stone-500 line-clamp-2 mt-1">
-                    {product.description}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between">
+          {filtered.map((product) => {
+            const catInfo = getProductCategory(product);
+            return (
+              <div
+                key={product.id}
+                onClick={() => setActiveProduct(product)}
+                className="group bg-white rounded-3xl p-4 border border-stone-200/70 hover:border-[#1B4332]/40 hover:shadow-xl transition cursor-pointer flex flex-col justify-between"
+              >
                 <div>
-                  <span className="text-xs text-stone-400 block">Giá từ</span>
-                  <span className="text-lg font-extrabold text-[#1B4332]">
-                    {formatVND(product.price)}
-                  </span>
+                  <div className="relative h-48 rounded-2xl overflow-hidden bg-stone-100">
+                    <img
+                      src={product.imageUrl}
+                      alt={product.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                    />
+                    <div className="absolute top-3 left-3 flex items-center gap-1.5 flex-wrap">
+                      <span className="bg-[#1B4332]/90 text-white text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-xs">
+                        {catInfo.name}
+                      </span>
+                      {product.badge && (
+                        <span className="bg-amber-400 text-stone-950 text-xs font-bold px-2.5 py-1 rounded-full shadow-xs">
+                          {product.badge}
+                        </span>
+                      )}
+                    </div>
+                    <span className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-xs text-white text-[11px] px-2.5 py-0.5 rounded-full">
+                      Còn {product.stock} ly
+                    </span>
+                  </div>
+
+                  <div className="mt-4">
+                    <h3 className="font-bold text-lg text-stone-900 group-hover:text-[#1B4332] transition">
+                      {product.name}
+                    </h3>
+                    <p className="text-xs text-stone-500 line-clamp-2 mt-1">
+                      {product.description}
+                    </p>
+                  </div>
                 </div>
-                <button
-                  type="button"
-                  className="bg-[#1B4332]/10 group-hover:bg-[#1B4332] text-[#1B4332] group-hover:text-white p-2.5 rounded-xl transition"
-                >
-                  <Plus className="w-5 h-5" />
-                </button>
+
+                <div className="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between">
+                  <div>
+                    <span className="text-xs text-stone-400 block">Giá từ</span>
+                    <span className="text-lg font-extrabold text-[#1B4332]">
+                      {formatVND(product.price)}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className="bg-[#1B4332]/10 group-hover:bg-[#1B4332] text-[#1B4332] group-hover:text-white p-2.5 rounded-xl transition"
+                  >
+                    <Plus className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Coffee, Lock, Mail, CheckCircle2 } from 'lucide-react';
+import { Coffee, Lock, Mail, CheckCircle2, AlertCircle } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/store/useAuthStore';
 
@@ -20,40 +20,43 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
     setSuccessMsg('');
 
+    // Validate cơ bản ở phía Frontend
+    if (password.length < 6) {
+      setError('Mật khẩu phải có tối thiểu 6 ký tự');
+      return;
+    }
+
+    if (isRegister && password !== confirmPassword) {
+      setError('Mật khẩu xác nhận không khớp');
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      // Validate cơ bản ở phía Frontend
-      if (password.length < 6) {
-        throw new Error('Mật khẩu phải có tối thiểu 6 ký tự');
-      }
-
       if (isRegister) {
-        if (password !== confirmPassword) {
-          throw new Error('Mật khẩu xác nhận không khớp');
-        }
-
         // 1. Gọi API Đăng ký: POST /auth/register
         const regRes = await api.register(email, password);
 
         // Nếu backend trả về luôn accessToken & user sau khi đăng ký
         if (regRes?.accessToken && regRes?.user) {
           loginSuccess(regRes.user, regRes.accessToken);
-          router.push('/checkout');
+          router.push('/');
           return;
         }
 
         // Nếu backend chỉ trả về thông tin user vừa tạo -> tự động gọi tiếp login để lấy JWT
         const loginRes = await api.login(email, password);
         loginSuccess(loginRes.user, loginRes.accessToken);
-        router.push('/checkout');
+        router.push('/');
       } else {
         // 2. Gọi API Đăng nhập: POST /auth/login
         const res = await api.login(email, password);
         loginSuccess(res.user, res.accessToken);
-        router.push('/checkout');
+        router.push('/');
       }
     } catch (err: any) {
       setError(err.message || 'Có lỗi xảy ra, vui lòng thử lại');
@@ -84,8 +87,9 @@ export default function LoginPage() {
       </div>
 
       {error && (
-        <div className="mb-4 p-3 rounded-xl bg-red-50 text-red-600 text-xs font-medium">
-          {error}
+        <div className="mb-4 p-3 rounded-xl bg-red-50 text-red-600 text-xs font-medium flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 shrink-0 text-red-500" />
+          <span>{error}</span>
         </div>
       )}
 
@@ -130,6 +134,11 @@ export default function LoginPage() {
               className="w-full pl-10 pr-4 py-3 rounded-xl border border-stone-300 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#1B4332]"
             />
           </div>
+          {isRegister && (
+            <p className="text-[11px] text-stone-500 mt-1.5 flex items-center gap-1 font-medium">
+              <span>* Mật khẩu phải có tối thiểu 6 ký tự</span>
+            </p>
+          )}
         </div>
 
         {/* Hiển thị thêm ô Xác nhận mật khẩu khi đang ở chế độ Đăng ký */}
@@ -150,6 +159,16 @@ export default function LoginPage() {
                 className="w-full pl-10 pr-4 py-3 rounded-xl border border-stone-300 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#1B4332]"
               />
             </div>
+            {confirmPassword.length > 0 && confirmPassword !== password && (
+              <p className="text-xs text-red-500 mt-1.5 flex items-center gap-1 font-medium">
+                <span>Mật khẩu xác nhận không khớp</span>
+              </p>
+            )}
+            {confirmPassword.length >= 6 && confirmPassword === password && (
+              <p className="text-xs text-emerald-600 mt-1.5 flex items-center gap-1 font-medium">
+                <span>Mật khẩu xác nhận trùng khớp</span>
+              </p>
+            )}
           </div>
         )}
 

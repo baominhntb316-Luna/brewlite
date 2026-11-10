@@ -14,6 +14,8 @@
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "dotenv -e ../../.env -- jest --config jest.config.ts",
+    "test:task10": "jest --config jest.config.ts src/task10.spec.ts",
+    "clean:task10": "ts-node prisma/clean.ts",
     "prisma": "dotenv -e ../../.env -- prisma",
     "db:push": "dotenv -e ../../.env -- prisma db push",
     "db:migrate": "dotenv -e ../../.env -- prisma migrate dev",

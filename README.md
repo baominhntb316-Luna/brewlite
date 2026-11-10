@@ -39,7 +39,8 @@ brewlite/
 Đảm bảo máy đã cài đặt **Docker Desktop**. Tại thư mục gốc của dự án, chạy lệnh:
 
 ```bash
-docker compose up --build -d
+cp .env.example .env >>
+docker compose up --build -d >>
 ```
 * **Frontend (Next.js)**: Truy cập tại `http://localhost:3000`
 * **Backend API (NestJS)**: Hoạt động tại `http://localhost:3001`
