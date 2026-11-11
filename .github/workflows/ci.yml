@@ -29,7 +29,7 @@ jobs:
               --base main \
               --head "${{ github.ref_name }}" \
               --title "${{ github.ref_name }}: ${{ github.event.head_commit.message }}" \
-              --body "**Automated PR created by BrewLite CI Pipeline**\n\n- **Branch:** \`${{ github.ref_name }}\`\n- **Commit:** \`${{ github.sha }}\`\n- **Status:** Đang tự động kích hoạt cổng kiểm thử chất lượng (Quality Gate). Nếu pass 100% sẽ tự động merge vào \`main\`."
+              --body "**Automated PR created by BrewLite CI Pipeline**\n\n- **Branch:** \`${{ github.ref_name }}\`\n- **Commit:** \`${{ github.sha }}\`\n- **Status:** Đang tự động kích hoạt cổng kiểm thử chất lượng (Quality Gate). Nếu pass 100% sẽ tự động merge vào \`main\`." || echo "Chưa có commit mới để tạo PR"
           else
             echo "✅ PR #${EXISTING_PR} đã tồn tại cho nhánh ${{ github.ref_name }}. Hệ thống sẽ tiếp tục chạy kiểm thử."
           fi
