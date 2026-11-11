@@ -14,6 +14,7 @@ const CATEGORIES = [
 ];
 
 export default function HomePage() {
+  const deliberateErrorForCI: number = "Chuỗi này sẽ làm gãy TypeScript typecheck";
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('ALL');
