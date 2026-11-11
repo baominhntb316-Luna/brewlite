@@ -14,6 +14,8 @@ const CATEGORIES = [
 ];
 
 export default function HomePage() {
+   // Check Task 4.4: Tạo bug chạy test CI Quality web Gate
+  const deliberateErrorForCI: number = "Chuỗi này sẽ làm gãy TypeScript typecheck";
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('ALL');
