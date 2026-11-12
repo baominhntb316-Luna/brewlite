@@ -118,7 +118,12 @@ jobs:
 
       - name: Auto-merge Pull Request
         run: |
-          echo "Cả Web và API Quality Gates đều đạt chuẩn! Đang tự động merge PR #${{ github.event.pull_request.number }} vào main..."
-          gh pr merge ${{ github.event.pull_request.number }} --merge --auto || gh pr merge ${{ github.event.pull_request.number }} --merge || gh pr merge ${{ github.event.pull_request.number }} --admin --merge
+          PR_NUM="${{ github.event.pull_request.number }}"
+          CONTRIBUTOR=$(gh pr view $PR_NUM --json author --jq '.author.login')
+          BRANCH="${{ github.event.pull_request.head.ref }}"
+          
+          echo "Đang tự động merge PR #$PR_NUM của tác giả @$CONTRIBUTOR vào main..."
+   
+          gh pr merge $PR_NUM --merge --subject "Merge pull request #$PR_NUM from @$CONTRIBUTOR ($BRANCH)" || gh pr merge $PR_NUM --merge --auto || gh pr merge $PR_NUM --admin --merge
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
