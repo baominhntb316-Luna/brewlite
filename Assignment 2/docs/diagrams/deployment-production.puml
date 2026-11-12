@@ -1,0 +1,127 @@
+@startuml deployment-production
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam roundCorner 10
+skinparam componentStyle uml2
+
+title UML Deployment Diagram - BrewLite Production Architecture (Task 3.2)
+
+' ======================================================
+' 1. USER & LOCAL ENVIRONMENT BOUNDARY
+' ======================================================
+package "Local & Client Boundary" {
+    node "User Device (Client)" as ClientDevice <<Device>> {
+        node "Web Browser / Mobile PWA" as Browser <<Execution Environment>> {
+            artifact "BrewLite SPA / PWA Client" as SPA <<Artifact>>
+        }
+    }
+
+    node "Developer Machine (Local)" as LocalDev <<Device>> {
+        node "Local Docker Engine" as LocalDocker {
+            artifact "docker-compose.yml" as LocalCompose
+            component "Web (localhost:3000)" as LocalWeb
+            component "API (localhost:3001)" as LocalAPI
+            database "Local PostgreSQL (port: 5432)" as LocalDB
+        }
+    }
+}
+
+' ======================================================
+' 2. CI/CD & REGISTRY BOUNDARY
+' ======================================================
+cloud "GitHub Actions (CI/CD Pipeline)" as CICDCloud {
+    node "CI Runner (Ubuntu Latest)" as CIRunner {
+        component "Quality Gate (Lint, Test, Build)" as CIQualityGate
+        component "Docker Image Builder" as CIBuilder
+        component "Automated Migration & Smoke Test" as CISmokeTest
+    }
+    
+    node "GitHub Container Registry (GHCR) / DockerHub" as Registry <<Repository>> {
+        artifact "brewlite-web:tag / SHA" as ImageWeb <<Docker Image>>
+        artifact "brewlite-api:tag / SHA" as ImageAPI <<Docker Image>>
+    }
+}
+
+' ======================================================
+' 3. PRODUCTION CLOUD INFRASTRUCTURE (Render / Railway / Cloud)
+' ======================================================
+cloud "Production Cloud Platform (PaaS / Cloud)" as ProdCloud {
+
+    ' Edge & Frontend Tier
+    node "Edge Network / CDN (Vercel / Cloudflare)" as EdgeNode <<Server>> {
+        node "Next.js Hosting Environment" as NextNode <<Execution Environment>> {
+            component "Next.js SSR / Static Frontend" as ProdWeb <<Application>>
+            interface "HTTPS (Port 443)\nTLS 1.3" as WebHTTPS
+        }
+    }
+
+    ' Backend Application Tier
+    node "Container App Cluster (Render / Railway / VPS)" as AppServerNode <<Server>> {
+        node "Docker Container (apps/api)" as APIContainer <<Execution Environment>> {
+            component "NestJS Application Engine" as ProdAPI <<Application>>
+            component "Health Check Endpoint (/health)" as HealthCheck
+            component "Logger / Monitoring (stdout/Winston)" as APILogger
+            interface "HTTP/HTTPS (Port 3001 / Internal)" as APIPort
+        }
+    }
+
+    ' Database Tier
+    node "Managed Database Server" as DBServerNode <<Server>> {
+        database "PostgreSQL 16 (Relational DB)" as ProdDB <<Database System>> {
+            folder "Persistent Storage (Attached Volume)" as DBVolume {
+                artifact "BrewLite Data (Users, Orders, Payments...)" as DBData
+            }
+        }
+        interface "PostgreSQL Protocol (Port 5432 / Private Network)" as DBPort
+    }
+
+    ' Secret Management & Config
+    node "Cloud Secrets & Environment Config" as SecretNode <<Service>> {
+        artifact "Production Secrets (.env)" as ProdSecrets <<Config>>
+        note right of ProdSecrets
+          - DATABASE_URL
+          - JWT_SECRET
+          - IDEMPOTENCY_SALT
+          - NODE_ENV=production
+        end note
+    }
+}
+
+' ======================================================
+' 4. THIRD-PARTY PAYMENT MOCK SERVICE
+' ======================================================
+cloud "External Payment Services (Simulated Gateway)" as ExtServices {
+    component "MoMo / VNPay / Bank QR Mock Service" as PaymentMock
+}
+
+' ======================================================
+' CONNECTIONS & PROTOCOLS
+' ======================================================
+' Client to Frontend
+Browser -- WebHTTPS : HTTPS / WSS\n(Public Internet)
+WebHTTPS --> ProdWeb
+
+' Frontend to Backend
+ProdWeb --> APIPort : HTTPS REST API Calls\n[Bearer JWT, Idempotency-Key]
+APIPort --> ProdAPI
+
+' Backend to Database
+ProdAPI --> DBPort : Prisma ORM\n(TCP Private Network - Strictly Non-Public)
+DBPort --> ProdDB
+
+' Backend to External Services
+ProdAPI --> PaymentMock : HTTPS External Webhook / API
+
+' Secrets Injection
+ProdSecrets ..> ProdAPI : Injected via Container Env
+ProdSecrets ..> ProdWeb : Injected via CDN Env
+
+' CI/CD Pipeline Flow
+LocalDev ..> CICDCloud : git push / Pull Request (main)
+CIQualityGate --> CIBuilder : Passed All Tests
+CIBuilder --> Registry : Push Tagged Images
+Registry --> AppServerNode : Automated Deployment Webhook
+CISmokeTest ..> HealthCheck : Verify Deployment (/health)
+
+@enduml
