@@ -1,0 +1,173 @@
+@startuml class-diagram
+title Class-01 – Domain Model BrewLite (Assignment 2)
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 6
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam classAttributeFontName Consolas
+skinparam classAttributeFontSize 11
+skinparam classFontStyle bold
+skinparam classFontSize 13
+skinparam stereotypeFontStyle italic
+skinparam stereotypeFontSize 11
+skinparam ArrowColor #334155
+skinparam ArrowFontSize 11
+skinparam ArrowFontStyle italic
+skinparam ArrowThickness 1.3
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #1B4332
+  BorderThickness 1.5
+  HeaderBackgroundColor #E8F5EE
+}
+skinparam package {
+  BackgroundColor #FAFAFA
+  BorderColor #CBD5E1
+  FontStyle bold
+}
+skinparam nodesep 60
+skinparam ranksep 65
+hide circle
+
+' ===== Domain Entities (từ Assignment 2/apps/api/prisma/schema.prisma) =====
+class User {
+  + id: Int {PK}
+  + email: String {unique}
+  + passwordHash: String
+  + role: Role = CUSTOMER
+  + loyaltyPoints: Int = 0
+  + createdAt: DateTime
+  --
+  + addLoyaltyPoints(points: Int): void
+}
+
+class Order {
+  + id: Int {PK}
+  + userId: Int {FK}
+  + status: OrderStatus = PENDING
+  + total: Int
+  + discount: Int = 0
+  + couponCode: String?
+  + promotionId: Int? {FK}
+  + createdAt: DateTime
+  --
+  + assertTransition(to: OrderStatus): void
+  + calculateTotal(subtotal: Int): Int
+}
+
+class Promotion {
+  + id: Int {PK}
+  + code: String {unique}
+  + type: PromotionType
+  + value: Int
+  + validFrom: DateTime?
+  + validTo: DateTime?
+  + active: Boolean = true
+  + createdAt: DateTime
+  --
+  + calculateDiscount(subtotal: Int): Int
+}
+
+class LoyaltyTransaction {
+  + id: Int {PK}
+  + userId: Int {FK}
+  + orderId: Int? {FK}
+  + points: Int
+  + createdAt: DateTime
+}
+
+class OrderItem {
+  + id: Int {PK}
+  + orderId: Int {FK}
+  + productId: Int {FK}
+  + size: Size = M
+  + toppings: String[]
+  + qty: Int
+  + lineTotal: Int
+}
+
+class Payment {
+  + id: Int {PK}
+  + orderId: Int {FK}
+  + idempotencyKey: String {unique}
+  + amount: Int
+  + method: PaymentMethod
+  + status: String
+  + createdAt: DateTime
+}
+
+class Product {
+  + id: Int {PK}
+  + name: String
+  + price: Int
+  + imageUrl: String
+  + stock: Int = 100
+  + version: Int = 1
+  + categoryId: Int? {FK}
+  --
+  + reserveStock(qty: Int): Boolean
+  + releaseStock(qty: Int): void
+}
+
+class Category {
+  + id: Int {PK}
+  + name: String {unique}
+  + code: String {unique}
+  + createdAt: DateTime
+}
+
+' ===== Enumerations =====
+package "Enumerations" {
+  enum Role #FDF3E0 {
+    CUSTOMER
+    BARISTA
+    ADMIN
+  }
+
+  enum OrderStatus #FDF3E0 {
+    PENDING
+    PAID
+    PREPARING
+    READY
+    COMPLETED
+    PAYMENT_FAILED
+    CANCELLED
+  }
+
+  enum Size #FDF3E0 {
+    S
+    M
+    L
+  }
+
+  enum PaymentMethod #FDF3E0 {
+    WALLET
+    CARD
+  }
+
+  enum PromotionType #FDF3E0 {
+    PERCENT
+    FIXED
+  }
+}
+
+' ===== Relationships & Multiplicities =====
+User "1" -- "0..*" Order : đặt >
+Order "0..*" --> "0..1" Promotion : áp dụng >
+User "1" -- "0..*" LoyaltyTransaction : tích điểm >
+Order "0..1" -- "0..*" LoyaltyTransaction : phát sinh >
+Order "1" *-- "1..*" OrderItem : gồm >
+Order "1" -- "0..*" Payment : thanh toán qua >
+OrderItem "0..*" --> "1" Product : tham chiếu >
+Category "0..1" o-- "0..*" Product : phân loại >
+
+' ===== Enum Dependencies =====
+User ..> Role
+Order ..> OrderStatus
+OrderItem ..> Size
+Payment ..> PaymentMethod
+Promotion ..> PromotionType
+
+@enduml
