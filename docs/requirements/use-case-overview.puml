@@ -1,0 +1,77 @@
+@startuml use-case-overview
+' BrewLite - Sơ đồ use-case tổng quát (Task 1.2)
+' Xuất SVG: plantuml -tsvg use-case-overview.puml
+
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+}
+skinparam actor {
+  BorderColor #333333
+}
+
+title BrewLite – Sơ đồ use-case tổng quát
+
+actor "Khách hàng" as Customer
+actor "Nhân viên quầy\n(Barista)" as Barista
+actor "Quản lý cửa hàng" as Manager
+actor "Payment Service\n(mô phỏng)" as Payment <<system>>
+
+rectangle "BrewLite" {
+
+  ' ----- Phạm vi MVP -----
+  usecase "UC-01\nĐặt và thanh toán đơn hàng\n(FR-09..14)" as UC01
+  usecase "UC-02\nXem menu\n(FR-01)" as UC02
+  usecase "UC-03\nXem chi tiết, chọn size/topping\n(FR-02, FR-03)" as UC03
+  usecase "UC-04\nQuản lý giỏ hàng\n(FR-04, FR-05)" as UC04
+  usecase "UC-05\nĐăng ký tài khoản\n(FR-06)" as UC05
+  usecase "UC-06\nĐăng nhập\n(FR-07, FR-08)" as UC06
+  usecase "UC-07\nXem xác nhận, trạng thái\nvà lịch sử đơn\n(FR-16, FR-17)" as UC07
+  usecase "UC-08\nHủy đơn\n(FR-19)" as UC08
+  usecase "UC-09\nCập nhật trạng thái đơn\n(FR-18, FR-20)" as UC09
+  usecase "UC-10\nÁp mã khuyến mãi\n(FR-11)" as UC10
+  usecase "UC-11\nTích điểm thưởng\n(FR-15)" as UC11
+
+  ' ----- Phạm vi mở rộng (màu xám) -----
+  usecase "UC-12\nQuản trị sản phẩm,\ntồn kho, mã khuyến mãi\n(FR-22)" as UC12 #DDDDDD
+  usecase "UC-13\nXem dashboard doanh thu\n(FR-23)" as UC13 #DDDDDD
+}
+
+' ----- Khách hàng -----
+Customer -- UC02
+Customer -- UC03
+Customer -- UC04
+Customer -- UC05
+Customer -- UC06
+Customer -- UC01
+Customer -- UC07
+Customer -- UC08
+
+' ----- Quan hệ giữa các use-case -----
+UC01 ..> UC06 : <<include>>
+UC10 ..> UC01 : <<extend>>
+UC11 ..> UC01 : <<extend>>
+
+' ----- Actor hệ thống bên ngoài -----
+UC01 -- Payment
+
+' ----- Barista và Quản lý -----
+Barista -- UC09
+Manager -- UC12
+Manager -- UC13
+
+note right of UC09
+  Backend (state machine) thuộc MVP.
+  Giao diện barista thuộc phạm vi
+  mở rộng (EX-01).
+end note
+
+legend right
+  Nền trắng: thuộc MVP
+  Nền xám: phạm vi mở rộng (Extension)
+endlegend
+
+@enduml
