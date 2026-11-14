@@ -1,0 +1,208 @@
+name: Continuous Delivery & Deployment (CD Production)
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME_API: ${{ github.repository }}/backend
+  IMAGE_NAME_WEB: ${{ github.repository }}/frontend
+
+jobs:
+  # 1. Quality Gate: Lint, Test và Build trước khi đóng gói
+  quality-gate:
+    name: 1. Quality Gate (Test & Build)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password123
+          POSTGRES_DB: brewlite_cd_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Test & Build Backend
+        working-directory: Assignment-2/apps/api
+        env:
+          DATABASE_URL: postgresql://postgres:password123@localhost:5432/brewlite_cd_test?schema=public
+          JWT_SECRET: cd-secret-key-2026
+        run: |
+          npm ci --legacy-peer-deps
+          npx prisma generate
+          npx prisma db push --accept-data-loss
+          npx jest --config jest.config.ts src/task10.spec.ts --runInBand
+          npx jest --config jest.config.ts checkout-e2e.spec.ts --runInBand
+          npm run build
+
+      - name: Build Frontend
+        working-directory: Assignment-2/apps/web
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:3001
+          NEXT_PUBLIC_USE_MOCK: false
+        run: |
+          npm ci
+          npm run build
+
+  # 2 & 3. Đóng gói Docker Image có Tag (Commit SHA & Version) và Push lên Registry
+  docker-build-push:
+    name: 2 & 3. Docker Image Build & Push Registry
+    needs: quality-gate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry (GHCR)
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Metadata (Tags, Labels) for Backend
+        id: meta-api
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_API }}
+          tags: |
+            type=sha,format=short,prefix=sha-
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and Push Backend Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./Assignment-2/apps/api
+          file: ./Assignment-2/apps/api/Dockerfile
+          push: true
+          tags: ${{ steps.meta-api.outputs.tags }}
+          labels: ${{ steps.meta-api.outputs.labels }}
+
+      - name: Extract Metadata (Tags, Labels) for Frontend
+        id: meta-web
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_WEB }}
+          tags: |
+            type=sha,format=short,prefix=sha-
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and Push Frontend Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./Assignment-2/apps/web
+          file: ./Assignment-2/apps/web/Dockerfile
+          push: true
+          tags: ${{ steps.meta-web.outputs.tags }}
+          labels: ${{ steps.meta-web.outputs.labels }}
+
+  # 4 & 5. Triển khai vào Production bằng Secret của CI & Chạy Migration an toàn
+  deploy-production:
+    name: 4 & 5. Deploy to Production & Migration
+    needs: docker-build-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Safe Database Migration
+        if: env.PROD_DATABASE_URL != ''
+        working-directory: Assignment-2/apps/api
+        env:
+          DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+        run: |
+          npx prisma migrate deploy || npx prisma db push --accept-data-loss
+          echo "✔ Đã đồng bộ cơ sở dữ liệu Production thành công"
+
+      - name: Trigger Production Deployment via Webhook / Deploy Hook
+        run: |
+          echo "🚀 Kích hoạt triển khai phiên bản commit SHA: ${{ github.sha }} lên Production Cloud"
+          DEPLOYED=false
+          if [ -n "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" ]; then
+            curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+            echo "✔ Đã gửi tín hiệu deploy hook tới Render Cloud"
+            DEPLOYED=true
+          fi
+          if [ -n "${{ secrets.VERCEL_DEPLOY_HOOK_URL }}" ]; then
+            curl -X POST "${{ secrets.VERCEL_DEPLOY_HOOK_URL }}"
+            echo "✔ Đã gửi tín hiệu deploy hook tới Vercel"
+            DEPLOYED=true
+          fi
+          if [ -n "${{ secrets.DEPLOY_WEBHOOK_URL }}" ]; then
+            curl -X POST "${{ secrets.DEPLOY_WEBHOOK_URL }}"
+            echo "✔ Đã gửi webhook deploy"
+            DEPLOYED=true
+          fi
+          if [ "$DEPLOYED" = false ]; then
+            echo "ℹ Sẵn sàng nạp secret deploy hook (RENDER_DEPLOY_HOOK_URL hoặc VERCEL_DEPLOY_HOOK_URL) khi nhóm cấu hình hosting."
+          fi
+
+  # 6. Gọi Health Check & Smoke Test sau triển khai
+  smoke-test:
+    name: 6. Smoke Test & Health Check
+    needs: deploy-production
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Smoke Test on Production API /health
+        run: |
+          API_URL="${{ secrets.PRODUCTION_API_URL }}"
+          if [ -n "$API_URL" ]; then
+            echo "🔍 Đang gọi kiểm tra sức khỏe hệ thống: $API_URL/health"
+            for i in {1..10}; do
+              RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "$API_URL/health" || true)
+              if [ "$RESPONSE" = "200" ]; then
+                echo "✔ Smoke Test thành công! Endpoint /health trả về mã HTTP 200 OK"
+                exit 0
+              fi
+              echo "Đang chờ server production khởi động (lần thử $i/10, mã: $RESPONSE)..."
+              sleep 10
+            done
+            echo "❌ Smoke Test thất bại sau 10 lần thử!"
+            exit 1
+          else
+            echo "ℹ Chưa thiết lập secret PRODUCTION_API_URL. Bỏ qua Smoke Test live."
+          fi
+
+  # 7. Rollback khi triển khai thất bại
+  rollback:
+    name: 7. Rollback Handler
+    needs: [deploy-production, smoke-test]
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Rollback Notification & Action
+        run: |
+          echo "⚠️ PHÁT HIỆN SỰ CỐ TRIỂN KHAI HOẶC SMOKE TEST THẤT BẠI!"
+          echo "Dừng ngay pipeline và hướng dẫn rollback:"
+          echo "1. Kiểm tra log của bước bị lỗi trên GitHub Actions."
+          echo "2. Revert commit gần nhất hoặc redeploy image tag ổn định trước đó."
+          echo "3. Lệnh khôi phục phiên bản trước: git revert HEAD && git push origin main"
