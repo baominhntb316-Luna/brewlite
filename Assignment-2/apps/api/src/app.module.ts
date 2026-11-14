@@ -6,6 +6,7 @@ import { OrdersModule } from './order/orders.module';
 import { PaymentsModule } from './payments/payments.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { HealthModule } from './health/health.module'
 
 @Module({
   imports: [
@@ -14,8 +15,9 @@ import { AppService } from './app.service';
     ProductsModule,
     OrdersModule,
     PaymentsModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
