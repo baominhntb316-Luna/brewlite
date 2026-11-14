@@ -1,4 +1,4 @@
-#BrewLite - Ứng dụng Đặt Cà Phê Không Tiền Mặt (Assignment 2)
+# BrewLite - Ứng dụng Đặt Cà Phê Không Tiền Mặt (Assignment 2)
 
 **Bài tập lớn môn Công nghệ Phần mềm (Software Engineering)**  
 **Đề tài: BrewLite – Requirements to Deployment (Ver 1.0)**  
@@ -222,9 +222,149 @@ npm run dev
 4. **Khuyến mãi & Tích điểm Loyalty**:
    * Hỗ trợ áp mã giảm giá (`BREWLITE10`, `GIAM10K`, `SGU2026`) khi tạo đơn và tự động tích điểm `loyaltyPoints` (`10.000đ = 1 điểm`) khi thanh toán thành công.
 
-### Chạy bộ Kiểm thử (Unit & Integration Tests)
+### 6.1. Chạy bộ Kiểm thử (Unit, Integration, E2E, FR & NFR Tests)
 ```bash
 cd apps/api
+npm run lint
 npm test
 npx jest src/task10.spec.ts
 ```
+
+### 6.2. Hướng dẫn Đóng gói & Build Ứng dụng (Production Build)
+Để kiểm tra quá trình biên dịch TypeScript, đóng gói bundle Production cho cả Backend, Frontend và Docker Image trước khi triển khai:
+
+```bash
+# 1. Build Backend API (NestJS -> thư mục dist/)
+cd apps/api
+npx prisma generate
+npm run build
+
+# 2. Build Frontend Web/PWA (Next.js -> thư mục .next/)
+cd ../web
+npm run build
+
+# 3. Đóng gói Docker Images cho toàn bộ hệ thống tại thư mục Assignment-2
+cd ../..
+docker compose build --no-cache
+```
+
+---
+
+## 7. Triển khai Production (Deploy), Đường dẫn Cloud & Khôi phục Sự cố (Rollback)
+
+### 7.1. Danh sách Đường dẫn Môi trường Production & Health Check (Cloud URLs)
+Hệ thống được triển khai trên nền tảng Cloud hỗ trợ giao thức **HTTPS** và phân tách mạng nội bộ bảo mật cho Cơ sở dữ liệu:
+
+| Thành phần | Nền tảng Triển khai | URL Truy cập (Production) | Giao thức / Cổng |
+| :--- | :--- | :--- | :--- |
+| **Frontend Web / PWA** | Vercel / Cloudflare Edge | `https://brewlite-web.vercel.app` *(hoặc `https://brewlite.onrender.com`)* | HTTPS (`Port 443`) |
+| **Backend REST API** | Render Cloud Container | `https://api-brewlite.onrender.com` | HTTPS (`Port 443`) |
+| **Health Check Endpoint** | Render Cloud Service | `https://api-brewlite.onrender.com/health` | HTTPS (`Port 443`) |
+| **Managed Database** | PostgreSQL 16 (Render / Neon) | Kết nối nội bộ qua biến `DATABASE_URL` | PostgreSQL (`Port 5432` - Private Network) |
+
+* **Bảo mật Database & Secrets**: Cơ sở dữ liệu PostgreSQL trên Production **không mở cổng public trực tiếp ra Internet**, chỉ cho phép dịch vụ Backend API truy cập qua mạng nội bộ (Private Network). Toàn bộ khóa bí mật (`DATABASE_URL`, `JWT_SECRET`, `RENDER_DEPLOY_HOOK_URL`) được lưu trữ trong **GitHub Actions Secrets** và **Cloud Environment Variables**, tuyệt đối không xuất hiện trong mã nguồn hoặc log CI/CD.
+
+---
+
+### 7.2. Quy trình Triển khai lên Production (Continuous Delivery / Deployment)
+
+#### Cách 1: Triển khai Tự động qua GitHub Actions CD Pipeline (`.github/workflows/cd.yml`)
+Khi có sự kiện gộp Pull Request vào nhánh `main` hoặc đẩy thẻ phiên bản `v*.*.*` (`git push origin v2.0.0`), pipeline CD tự động thực thi tuần tự **7 chặng**:
+1. **Quality Gate (`Lint & Test`)**: Cài đặt dependencies, khởi chạy PostgreSQL service container, kiểm tra `npm run lint`, chạy toàn bộ bộ test (`npm test`) và kiểm tra biên dịch.
+2. **Build Application**: Đóng gói tạo phẩm biên dịch cho `apps/api` và `apps/web`.
+3. **Docker Image & Tagging**: Đóng gói Multi-stage Docker Image cho Backend và Frontend, gắn tag theo **Commit SHA** (`sha-<commit>`) và **Semantic Version** (`v1.0.0`, `v2.0.0`, `latest`).
+4. **Push Container Registry**: Đẩy Docker Images lên **GitHub Container Registry (`ghcr.io`)**.
+5. **Deploy & Safe Migration**: Thực thi migration an toàn bằng `npx prisma migrate deploy` (không làm mất dữ liệu hiện có) và kích hoạt Deploy Hook lên hạ tầng Production.
+6. **Post-Deploy Smoke Test (`GET /health`)**: Tự động gọi `curl --fail https://api-brewlite.onrender.com/health` kiểm tra mã phản hồi `HTTP 200 OK`, trạng thái `"status": "ok"` và kết nối `"database": { "status": "connected" }`.
+7. **Auto Failure Detection & Rollback Alert**: Nếu bất kỳ bước nào hoặc Smoke Test thất bại, pipeline lập tức dừng lại và xuất hướng dẫn Rollback khẩn cấp.
+
+#### Cách 2: Triển khai Thủ công lên Nền tảng Cloud (Render & Vercel)
+1. **Triển khai Database & Backend API (Render.com)**:
+   * Khởi tạo dịch vụ **PostgreSQL** trên Render $\rightarrow$ Sao chép chuỗi kết nối nội bộ (`Internal Database URL`).
+   * Khởi tạo **Web Service** liên kết với repository GitHub, chọn thư mục gốc `Assignment-2/apps/api` (Runtime: `Docker`).
+   * Thiết lập các biến môi trường: `NODE_ENV=production`, `PORT=3001`, `DATABASE_URL`, `JWT_SECRET`, `CORS_ORIGIN`.
+2. **Triển khai Frontend Next.js (Vercel.com)**:
+   * Import repository vào Vercel, cấu hình **Root Directory** là `Assignment-2/apps/web`.
+   * Thiết lập biến môi trường `NEXT_PUBLIC_API_URL=https://api-brewlite.onrender.com` và nhấn **Deploy**.
+
+---
+
+### 7.3. Quy trình Khôi phục Khi Sự cố (Rollback Strategy)
+Khi bản triển khai mới gặp sự cố (Smoke Test tại `/health` trả về `503 Service Unavailable` hoặc phát sinh lỗi nghiệp vụ trên Production), nhóm thực hiện khôi phục theo 2 bước:
+
+#### Bước 1: Rollback Tức thời trên Hạ tầng Cloud & Container Registry (Zero-Downtime)
+* **Trên Render / Railway Dashboard**: Truy cập mục **Deployments** $\rightarrow$ Chọn bản phát hành ổn định liền trước $\rightarrow$ Nhấn **"Rollback to this deploy"** để chuyển lưu lượng về container cũ trong vòng chưa đầy 10 giây.
+* **Trên Vercel Dashboard**: Truy cập mục **Deployments** $\rightarrow$ Chọn bản build ổn định trước đó $\rightarrow$ Nhấn **"Promote to Production"**.
+* **Hoặc kéo trực tiếp Image theo Commit SHA ổn định từ GHCR**:
+  ```bash
+  docker pull ghcr.io/baominhntb316-luna/brewlite-api:<previous-stable-sha>
+  docker pull ghcr.io/baominhntb316-luna/brewlite-web:<previous-stable-sha>
+  ```
+
+#### Bước 2: Hoàn tác Mã nguồn trên Git & Kích hoạt lại Pipeline
+```bash
+# 1. Tra cứu lịch sử commit/tag ổn định gần nhất
+git log --oneline -n 5
+
+# 2. Tạo commit hoàn tác an toàn và đẩy lên nhánh main (hoặc qua PR khẩn cấp)
+git revert HEAD --no-edit
+git push origin main
+```
+
+---
+
+## 8. Quản lý Phiên bản (Release / Git Tag) & Release Notes
+
+Dự án quản lý phát hành theo chuẩn **Semantic Versioning (`vMAJOR.MINOR.PATCH`)** gắn với từng Sprint:
+
+```bash
+# Gắn thẻ phiên bản và đẩy tag lên GitHub
+git tag -a v1.0.0 -m "Release v1.0.0: Sprint 1 MVP - Menu, Docs & CI Pipeline"
+git tag -a v2.0.0 -m "Release v2.0.0: Sprint 2 Production Delivery - Full E2E Checkout, CD & HealthCheck"
+git push origin --tags
+```
+
+### 8.1. Release Notes `v1.0.0` – Sprint 1 Release
+* **Mục tiêu phát hành**: Thiết lập nền tảng kỹ thuật monorepo, hoàn thiện toàn bộ tài liệu yêu cầu – mô hình hóa – kiến trúc (Task 1–3), cấu hình pipeline CI và phát hành MVP đầu tiên cho luồng Xem Menu.
+* **Nội dung bàn giao**:
+  * **Tài liệu Yêu cầu & Mô hình hóa**: Bối cảnh & phạm vi (`docs/requirements/context-and-scope.md`), đặc tả SRS (`docs/requirements/srs.md` với `FR-01`..`FR-23`, `NFR-01`..`NFR-12`), đặc tả Use-case trọng tâm Đặt & Thanh toán đơn hàng (`docs/requirements/use-case-checkout.md`) và bộ sơ đồ UML `.puml`/`.svg` (Use-case, Activity, Sequence, Class Diagram).
+  * **Thiết kế Kiến trúc & ADR**: Tài liệu kiến trúc tổng thể (`docs/architecture/architecture-overview.md`), sơ đồ triển khai Production (`deployment-production.puml`/`.svg`) và 5 bản ghi quyết định kiến trúc (`ADR-001`..`ADR-005`).
+  * **MVP Xem Menu & Nền tảng Monorepo**: Cấu trúc `apps/web`, `apps/api`, `docs`, `tests`; Prisma Schema, migration khởi tạo PostgreSQL và script `seed.ts`; API `GET /products`, `GET /products/:id`, `GET /products/categories`; màn hình Menu mobile-first trên Next.js xử lý đầy đủ trạng thái `loading`, `empty`, `error`.
+  * **Continuous Integration**: Pipeline `.github/workflows/ci.yml` tự động kiểm tra `Install -> Lint -> Unit Test -> Build` khi mở Pull Request.
+
+### 8.2. Release Notes `v2.0.0` – Sprint 2 Production Release
+* **Mục tiêu phát hành**: Hoàn thiện luồng nghiệp vụ End-to-End từ chọn món đến thanh toán và theo dõi đơn hàng, tích hợp bộ kiểm thử tự động toàn diện, thiết lập pipeline CD 7 bước và triển khai Production qua HTTPS.
+* **Nội dung bàn giao**:
+  * **Hoàn thiện MVP End-to-End**:
+    * Tùy chọn kích cỡ (`S`/`M`/`L`), topping và tính giá tự động (`FR-02`).
+    * Quản lý giỏ hàng với Zustand, lưu trữ `localStorage` và áp mã khuyến mãi `BREWLITE10`, `GIAM10K`, `SGU2026` (`FR-03`).
+    * Đăng ký, đăng nhập (`bcrypt` + `JWT`) và phân quyền `CUSTOMER` / `BARISTA` (`FR-04`, `NFR-04`, `NFR-05`).
+    * Đặt đơn hàng (`POST /orders`) sử dụng Database Transaction kết hợp **Optimistic Locking (`version`)** chống âm kho khi đặt đồng thời (`FR-05`, `NFR-02`, `NFR-09`).
+    * Thanh toán Ví điện tử / Thẻ ngân hàng mô phỏng (`POST /payments`) hỗ trợ `Idempotency-Key` chống thanh toán trùng lặp và cộng điểm thưởng `loyaltyPoints` (`FR-06`).
+    * Quản lý vòng đời đơn hàng theo **Order State Machine** (`PATCH /orders/:id/status`), hoàn kho tự động khi hủy đơn (`CANCELLED`) và xem lịch sử đơn (`GET /orders/me`) (`FR-07`, `FR-08`).
+  * **Tích hợp, Kiểm thử Toàn diện & Health Check**:
+    * Endpoint `GET /health` kiểm tra kết nối PostgreSQL thực tế (`SELECT 1`), trả về trạng thái hệ thống và độ trễ DB.
+    * Hoàn thiện `docker-compose.yml` với `healthcheck` tự động cho cả PostgreSQL và Backend API.
+    * Bộ kiểm thử tự động bao phủ toàn diện: Unit Test, Integration Test (`orders-payments-integration.spec.ts`), E2E Test (`checkout-e2e.spec.ts`), FR Test (`fr-*.spec.ts`) và NFR Test (`nfr.spec.ts`).
+  * **Continuous Delivery, Bàn giao & Truy vết**:
+    * Pipeline CD 7 bước (`.github/workflows/cd.yml`) tự động build, push Docker Image lên GHCR, chạy migration an toàn (`prisma migrate deploy`), kiểm tra Smoke Test `/health` và hỗ trợ Rollback.
+    * Hoàn thiện Ma trận truy vết (`docs/traceability-matrix.md`) và Tài liệu triển khai & vận hành (`docs/deployment.md`).
+
+---
+
+## 9. Tổng kết Sprint Review & Sprint Retrospective
+
+### 9.1. Sprint Review (Nghiệm thu Sản phẩm)
+* **Kết quả đạt được so với Sprint Goal**:
+  * Hoàn thành 100% các hạng mục trong Product Backlog của cả **Sprint 1 (`S1-01`..`S1-07`)** và **Sprint 2 (`S2-01`..`S2-10`)** theo đúng tiêu chuẩn Definition of Done (DoD).
+  * Luồng nghiệp vụ End-to-End hoạt động thông suốt: *Xem Menu $\rightarrow$ Chọn Size & Topping $\rightarrow$ Giỏ hàng & Mã giảm giá $\rightarrow$ Đăng ký/Đăng nhập JWT $\rightarrow$ Đặt đơn (Optimistic Locking) $\rightarrow$ Thanh toán Không tiền mặt (Idempotent) & Tích điểm Loyalty $\rightarrow$ Theo dõi & Cập nhật trạng thái đơn (Order State Machine)*.
+  * Toàn bộ hệ thống khởi chạy ổn định chỉ với một lệnh `docker compose up --build -d`, vượt qua toàn bộ bài kiểm thử tự động trên CI/CD và triển khai thành công lên môi trường Production (HTTPS).
+
+### 9.2. Sprint Retrospective (Rút kinh nghiệm)
+* **Những điểm nhóm đã làm tốt (What Went Well)**:
+  * **Tuân thủ quy trình GitHub Flow & CI Quality Gate**: Mọi thay đổi tài liệu và mã nguồn đều đi qua nhánh riêng, tuân thủ chuẩn Conventional Commits, được kiểm tra tự động bởi CI trước khi gộp vào `main`, giúp nhánh chính luôn ổn định và tránh xung đột lớn.
+  * **Thiết kế kiến trúc và mô hình hóa rõ ràng ngay từ đầu**: Các sơ đồ Activity, Sequence, Class Diagram và 5 bản ghi ADR ở Task 2–3 giúp việc chia việc hiện thực Frontend/Backend ở Task 4–5 diễn ra mạch lạc, nhất quán với SRS và Ma trận truy vết.
+  * **Giải quyết triệt để các bài toán kỹ thuật cốt lõi**: Hiện thực thành công cơ chế chống bán lố tồn kho khi có truy cập đồng thời (Optimistic Locking với trường `version`) và chống thanh toán lặp (Idempotency-Key).
+* **Những điểm cần cải thiện trong các phiên bản tiếp theo (What Could Be Improved)**:
+  * Tích hợp cổng thanh toán thực tế (VNPay / MoMo Sandbox IPN Webhook) thay cho cổng thanh toán mô phỏng nội bộ.
+  * Bổ sung kết nối thời gian thực qua **WebSocket / Server-Sent Events (SSE)** để tự động đẩy thông báo cập nhật trạng thái đơn hàng tức thời từ quầy Barista tới màn hình khách hàng mà không cần làm mới trang.
