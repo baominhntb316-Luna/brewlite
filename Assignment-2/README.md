@@ -144,7 +144,7 @@ Một User Story hoặc Task trong Sprint chỉ được chuyển sang trạng t
 ## 4. Hướng dẫn Cài đặt & Khởi chạy
 
 ### Cách 1: Chạy toàn bộ hệ thống bằng Docker Compose (Khuyên dùng khi Demo)
-Đảm bảo máy đã cài đặt **Docker Desktop**. Tại thư mục `Assignment 2`, chạy lệnh:
+Đảm bảo máy đã cài đặt **Docker Desktop**. Tại thư mục `Assignment-2`, chạy lệnh:
 
 ```bash
 cp .env.example .env
@@ -165,7 +165,7 @@ docker compose down
 ### Cách 2: Chạy môi trường Phát triển (Local Development trên VS Code)
 
 #### Bước 1: Thiết lập Biến môi trường chung (Root `.env`)
-Dự án sử dụng file `.env` tại thư mục gốc `Assignment 2`:
+Dự án sử dụng file `.env` tại thư mục gốc `Assignment-2`:
 ```bash
 cp .env.example .env
 ```
