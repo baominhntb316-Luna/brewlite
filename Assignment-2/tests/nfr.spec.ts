@@ -2,13 +2,16 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as bcrypt from 'bcrypt';
 import { ForbiddenException, BadRequestException } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
 import { OrderStatus, PaymentMethod, Size } from '@prisma/client';
 import { ProductsService } from '../apps/api/src/products/products.service';
 import { OrdersService } from '../apps/api/src/order/orders.service';
 import { PaymentsService } from '../apps/api/src/payments/payments.service';
 import { AuthService } from '../apps/api/src/auth/auth.service';
+import { AppModule } from '../apps/api/src/app.module';
 import { AppController } from '../apps/api/src/app.controller';
-import { AppService } from '../apps/api/src/app.service';
+import { HealthController } from '../apps/api/src/health/health.controller';
+import { PrismaService } from '../apps/api/src/prisma/prisma.service';
 import {
   MOCK_PRODUCTS,
   SIZE_OPTIONS,
@@ -321,14 +324,37 @@ describe('SRS Nhóm 9, 10, 11 & 12: Yêu cầu Phi chức năng (NFR-01..NFR-12)
   });
 
   describe('NFR-12: Tự động hóa CI/CD, Health Check & Triển khai HTTPS', () => {
-    it('TC-35: Xác nhận phản hồi từ AppController (GET / và GET /health) và tệp cấu hình pipeline CI (.github/workflows/ci.yml) có đủ bước Lint, Test, Build', () => {
-      const appController = new AppController(new AppService());
-      expect(appController.getHello()).toContain('Welcome to BrewLite API');
-      expect(appController.getHealth()).toMatchObject({
-        status: 'ok',
-        service: 'brewlite-api',
-      });
+    it('TC-35: Xác nhận phản hồi từ AppModule (GET / qua AppController và GET /health qua HealthController) và tệp cấu hình pipeline CI (.github/workflows/ci.yml) có đủ bước Lint, Test, Build', async () => {
+      // Khởi tạo trực tiếp từ AppModule để kiểm chứng kết nối AppModule -> HealthModule -> HealthController
+      const moduleRef = await Test.createTestingModule({
+        imports: [AppModule],
+      })
+        .overrideProvider(PrismaService)
+        .useValue({
+          $queryRaw: jest.fn().mockResolvedValue([{ '?column?': 1 }]),
+        })
+        .compile();
 
+      // 1. Kiểm tra GET / từ AppController
+      const appController = moduleRef.get<AppController>(AppController);
+      expect(appController.getHello()).toContain('Welcome to BrewLite API');
+
+      // 2. Kiểm tra GET /health từ HealthController (được nạp qua AppModule)
+      const healthController = moduleRef.get<HealthController>(HealthController);
+      const jsonMock = jest.fn();
+      const statusMock = jest.fn().mockReturnValue({ json: jsonMock });
+      await healthController.checkHealth({ status: statusMock } as any);
+
+      expect(statusMock).toHaveBeenCalledWith(200);
+      expect(jsonMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: 'ok',
+          service: 'brewlite-api',
+          database: expect.objectContaining({ status: 'connected' }),
+        }),
+      );
+
+      // 3. Kiểm tra cấu hình CI pipeline (.github/workflows/ci.yml)
       const ciPath = path.join(assignment2Root, '.github/workflows/ci.yml');
       expect(fs.existsSync(ciPath)).toBe(true);
       const ciContent = fs.readFileSync(ciPath, 'utf-8');
