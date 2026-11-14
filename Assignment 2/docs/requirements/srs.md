@@ -70,21 +70,20 @@ actor "Payment Service\n(mô phỏng)" as Payment <<system>>
 rectangle "BrewLite" {
 
   ' ----- Phạm vi MVP -----
-  usecase "UC-01\nĐặt và thanh toán đơn hàng\n(FR-09..14)" as UC01
-  usecase "UC-02\nXem menu\n(FR-01)" as UC02
-  usecase "UC-03\nXem chi tiết, chọn size/topping\n(FR-02, FR-03)" as UC03
-  usecase "UC-04\nQuản lý giỏ hàng\n(FR-04, FR-05)" as UC04
-  usecase "UC-05\nĐăng ký tài khoản\n(FR-06)" as UC05
-  usecase "UC-06\nĐăng nhập\n(FR-07, FR-08)" as UC06
-  usecase "UC-07\nXem xác nhận, trạng thái\nvà lịch sử đơn\n(FR-16, FR-17)" as UC07
-  usecase "UC-08\nHủy đơn\n(FR-19)" as UC08
-  usecase "UC-09\nCập nhật trạng thái đơn\n(FR-18, FR-20)" as UC09
-  usecase "UC-10\nÁp mã khuyến mãi\n(FR-11)" as UC10
-  usecase "UC-11\nTích điểm thưởng\n(FR-15)" as UC11
+  usecase "UC-01\nĐặt và thanh toán đơn hàng" as UC01
+  usecase "UC-02\nXem menu, lọc & tìm kiếm" as UC02
+  usecase "UC-03\nXem chi tiết, chọn size/topping" as UC03
+  usecase "UC-04\nQuản lý giỏ hàng" as UC04
+  usecase "UC-05\nĐăng ký tài khoản" as UC05
+  usecase "UC-06\nĐăng nhập & xác thực JWT" as UC06
+  usecase "UC-07\nXem xác nhận, tiến trình\nvà lịch sử đơn" as UC07
+  usecase "UC-08\nHủy đơn & hoàn tồn kho" as UC08
+  usecase "UC-09\nCập nhật trạng thái đơn" as UC09
+  usecase "UC-10\nÁp mã khuyến mãi tại Checkout" as UC10
+  usecase "UC-11\nTích điểm thưởng Loyalty" as UC11
 
   ' ----- Phạm vi mở rộng (màu xám) -----
-  usecase "UC-12\nQuản trị sản phẩm,\ntồn kho, mã khuyến mãi\n(FR-22)" as UC12 #DDDDDD
-  usecase "UC-13\nXem dashboard doanh thu\n(FR-23)" as UC13 #DDDDDD
+  usecase "UC-12\nGiao diện quản trị pha chế\nvà thực đơn" as UC12 #DDDDDD
 }
 
 ' ----- Khách hàng -----
@@ -107,13 +106,13 @@ UC01 -- Payment
 
 ' ----- Barista và Quản lý -----
 Barista -- UC09
+Barista -- UC12
 Manager -- UC12
-Manager -- UC13
 
 note right of UC09
-  Backend (state machine) thuộc MVP.
-  Giao diện barista thuộc phạm vi
-  mở rộng (EX-01).
+  Backend (Order State Machine) thuộc MVP.
+  Giao diện Barista/Admin thuộc phạm vi
+  mở rộng.
 end note
 
 legend right
@@ -124,23 +123,33 @@ endlegend
 @enduml
 ```
 
-### 2.2. Bảng ánh xạ Use-Case tổng quát với Actor và Mã yêu cầu
+### 2.2. Bảng ánh xạ Use-Case & User Story (UC/US) với Actor và Mã yêu cầu
 
-| Mã Use-Case | Tên Use-Case | Actor tham gia | Mã yêu cầu liên kết |
-| :--- | :--- | :--- | :--- |
-| **UC-01** | Đặt và thanh toán đơn hàng | Khách hàng, Dịch vụ Thanh toán (mô phỏng) | `FR-09`, `FR-10`, `FR-11`, `FR-12`, `FR-13`, `FR-14` |
-| **UC-02** | Xem menu | Khách hàng | `FR-01` |
-| **UC-03** | Xem chi tiết, chọn size/topping | Khách hàng | `FR-02`, `FR-03` |
-| **UC-04** | Quản lý giỏ hàng | Khách hàng | `FR-04`, `FR-05` |
-| **UC-05** | Đăng ký tài khoản | Khách hàng | `FR-06` |
-| **UC-06** | Đăng nhập | Khách hàng | `FR-07`, `FR-08` |
-| **UC-07** | Xem xác nhận, trạng thái và lịch sử đơn | Khách hàng | `FR-16`, `FR-17` |
-| **UC-08** | Hủy đơn | Khách hàng | `FR-19` |
-| **UC-09** | Cập nhật trạng thái đơn (backend thuộc MVP, giao diện barista thuộc phạm vi mở rộng EX-01) | Nhân viên quầy (Barista) | `FR-18`, `FR-20` |
-| **UC-10** | Áp mã khuyến mãi (`<<extend>>` UC-01) | Khách hàng | `FR-11` |
-| **UC-11** | Tích điểm thưởng (`<<extend>>` UC-01) | Khách hàng | `FR-15` |
-| **UC-12** | Quản trị sản phẩm, tồn kho, mã khuyến mãi (phạm vi mở rộng) | Quản lý cửa hàng | `FR-22` |
-| **UC-13** | Xem dashboard doanh thu (phạm vi mở rộng) | Quản lý cửa hàng | `FR-23` |
+| Mã UC / US | Tên Use-Case | User Story (Câu chuyện người dùng) | Actor tham gia | Mã yêu cầu liên kết |
+| :--- | :--- | :--- | :--- | :--- |
+| **UC-01** | Đặt và thanh toán đơn hàng (Cashless Checkout)| Khách hàng, Payment Service (mô phỏng) | `FR-13`, `FR-14`, `FR-15`, `FR-16`, `FR-17`, `FR-18` |
+
+| **UC-02** | Xem menu, lọc danh mục & tìm kiếm | Khách hàng | `FR-01`, `FR-02`, `FR-03` |
+
+| **UC-03** | Xem chi tiết, chọn size/topping & số lượng | Khách hàng | `FR-04`, `FR-05`, `FR-06` |
+
+| **UC-04** | Quản lý giỏ hàng | Khách hàng | `FR-07`, `FR-08`, `FR-09` |
+
+| **UC-05** | Đăng ký tài khoản | Khách hàng | `FR-10` |
+
+| **UC-06** | Đăng nhập & Xác thực JWT  | Khách hàng | `FR-11`, `FR-12` |
+
+| **UC-07** | Xem xác nhận, tiến trình và lịch sử đơn | Khách hàng | `FR-19`, `FR-20` |
+
+| **UC-08** | Hủy đơn & Hoàn trả tồn kho | Khách hàng | `FR-21`, `FR-22` |
+
+| **UC-09** | Cập nhật trạng thái đơn hàng  | Nhân viên quầy (Barista), Quản lý (Admin) | `FR-21` |
+
+| **UC-10** | Áp mã khuyến mãi tại trang Checkout (`<<extend>>` UC-01) | Khách hàng | `FR-14` |
+
+| **UC-11** | Tích điểm thưởng Loyalty (`<<extend>>` UC-01) | Khách hàng | `FR-18` |
+
+| **UC-12** | Giao diện quản trị pha chế và thực đơn (phạm vi mở rộng) | Barista, Quản lý cửa hàng | `FR-23` |
 
 ---
 
@@ -166,8 +175,8 @@ endlegend
 
 | Mã | Tên yêu cầu | Mô tả chi tiết | Ưu tiên (MoSCoW) | Tiêu chí chấp nhận (Acceptance Criteria) |
 | :--- | :--- | :--- | :--- | :--- |
-| **FR-07** | **Thao tác thêm, sửa, xóa mục trong giỏ hàng** | Người dùng có thể thêm món đã tùy chỉnh vào giỏ hàng (`CartDrawer`), tăng/giảm số lượng hoặc xóa từng mục; các mục trùng `(productId, size, toppings)` tự động cộng dồn số lượng. | **Must** | - Thêm cùng một món với cùng Size và Topping sẽ tăng `qty` của mục hiện có thay vì tạo dòng trùng.<br>- Badge trên nút *Giỏ hàng* ở Navbar luôn hiển thị đúng tổng số lượng ly hiện có. |
-| **FR-08** | **Tính tổng tạm tính và tổng thanh toán giỏ hàng** | Hệ thống tự động tính tổng tạm tính (`subtotal`), tiền giảm giá (`discount`) và tổng thanh toán cuối cùng (`total = max(0, subtotal - discount)`). | **Must** | - Khi thay đổi số lượng hoặc xóa món trong giỏ, `subtotal` và `total` cập nhật chính xác ngay lập tức.<br>- Khi giỏ hàng trống, nút chuyển sang trang thanh toán bị ẩn và hiển thị thông báo giỏ hàng trống. |
+| **FR-07** | **Thao tác thêm, sửa, xóa mục trong giỏ hàng** | Người dùng có thể thêm món đã tùy chỉnh vào ngăn kéo giỏ hàng (`CartDrawer`), tăng/giảm số lượng hoặc xóa từng mục; các mục trùng `(productId, size, toppings)` tự động cộng dồn số lượng. | **Must** | - Thêm cùng một món với cùng Size và Topping sẽ tăng `qty` của mục hiện có thay vì tạo dòng trùng.<br>- Badge trên nút *Giỏ hàng* ở Navbar luôn hiển thị đúng tổng số lượng ly hiện có (`getTotalCount()`). |
+| **FR-08** | **Tính tổng tạm tính trong giỏ hàng** | Ngăn kéo giỏ hàng (`CartDrawer`) tự động tính thành tiền từng dòng (`lineTotal = unitPrice × qty`) và tổng tạm tính (`subtotal`) của toàn bộ món trong giỏ trước khi chuyển sang trang thanh toán (`/checkout`). | **Must** | - Khi thay đổi số lượng hoặc xóa món trong giỏ, `lineTotal` và `subtotal` (`Tổng tạm tính`) cập nhật chính xác ngay lập tức.<br>- Khi giỏ hàng trống, nút chuyển sang trang `/checkout` bị ẩn và hiển thị thông báo *"Giỏ hàng đang trống"*. |
 | **FR-09** | **Lưu trữ giỏ hàng bền vững theo tài khoản** | Giỏ hàng được lưu trên `localStorage` tách biệt theo từng định danh người dùng (`userKey`) và tự động gộp các món chọn lúc chưa đăng nhập (`guest`) vào giỏ của tài khoản khi đăng nhập thành công. | **Should** | - Tải lại trang (F5) không làm mất các món đã chọn trong giỏ hàng.<br>- Đăng xuất sẽ ẩn giỏ của tài khoản cũ; đăng nhập lại tài khoản đó sẽ khôi phục đúng giỏ hàng đã lưu. |
 
 ### 3.4. Nhóm 4: Xác thực
@@ -182,8 +191,8 @@ endlegend
 
 | Mã | Tên yêu cầu | Mô tả chi tiết | Ưu tiên (MoSCoW) | Tiêu chí chấp nhận (Acceptance Criteria) |
 | :--- | :--- | :--- | :--- | :--- |
-| **FR-13** | **Khởi tạo đơn hàng trạng thái PENDING** | Khách hàng đã đăng nhập gửi yêu cầu `POST /orders` gồm danh sách món (`productId`, `size`, `toppings`, `qty`) và mã khuyến mãi tùy chọn; hệ thống kiểm tra dữ liệu và tạo đơn ở trạng thái `PENDING`. | **Must** | - Payload hợp lệ và đủ tồn kho trả về HTTP `201` với đơn hàng có `status = "PENDING"`, chi tiết `items` và tổng tiền `total` được tính chuẩn xác tại Backend.<br>- Danh sách `items` rỗng hoặc `qty < 1` trả về HTTP `400 Bad Request`. |
-| **FR-14** | **Áp dụng mã khuyến mãi khi đặt đơn** | Hỗ trợ nhập và áp dụng mã khuyến mãi hợp lệ: `BREWLITE10` (giảm 10% tổng tạm tính), `GIAM10K` (giảm trực tiếp 10.000đ), `SGU2026` (giảm 20% tổng tạm tính). | **Must** | - Mã hợp lệ được trừ đúng mức chiết khấu vào `discount` và `total = max(0, subtotal - discount)`.<br>- Mã không tồn tại trả về HTTP `400 Bad Request` kèm thông báo *"Mã giảm giá không hợp lệ"*. |
+| **FR-13** | **Khởi tạo đơn hàng trạng thái PENDING** | Tại trang `/checkout`, khách hàng đã đăng nhập gửi yêu cầu `POST /orders` gồm danh sách món (`productId`, `size`, `toppings`, `qty`) và mã khuyến mãi tùy chọn (`couponCode`); hệ thống kiểm tra dữ liệu, tính lại giá tại Backend và tạo đơn ở trạng thái `PENDING`. | **Must** | - Payload hợp lệ và đủ tồn kho trả về HTTP `201` với đơn hàng có `status = "PENDING"`, chi tiết `items` và tổng tiền `total` được tính chuẩn xác tại Backend.<br>- Danh sách `items` rỗng hoặc `qty < 1` trả về HTTP `400 Bad Request`. |
+| **FR-14** | **Áp dụng mã khuyến mãi và tính tổng thanh toán tại trang Checkout** | Trên trang `/checkout` (cùng màn hình với phương thức thanh toán) và trong API `POST /orders`, hỗ trợ nhập và áp dụng mã khuyến mãi: `BREWLITE10` (giảm 10% tổng tạm tính), `GIAM10K` (giảm trực tiếp 10.000đ), `SGU2026` (giảm 20% tổng tạm tính), tự động tính tiền giảm (`discount`) và tổng thanh toán (`total = max(0, subtotal - discount)`). | **Must** | - Mã hợp lệ được hiển thị ngay ở mục *Tóm tắt đơn hàng* trên trang `/checkout` và được Backend trừ đúng mức chiết khấu vào `discount`, `total`.<br>- Mã không tồn tại trả về thông báo lỗi ở Frontend và HTTP `400 Bad Request` (*"Mã giảm giá không hợp lệ"*) tại Backend. |
 | **FR-15** | **Kiểm soát tồn kho nguyên tử khi đặt đồng thời** | Khi tạo đơn, hệ thống thực hiện trong `prisma.$transaction` và dùng **Optimistic Locking** (`Product.version`) để trừ tồn kho (`stock`), ngăn chặn bán vượt tồn kho khi nhiều yêu cầu gửi đồng thời. | **Must** | - Khi sản phẩm còn `stock = 1` và có 2 yêu cầu đặt mua cùng lúc, chỉ 1 yêu cầu tạo đơn thành công (`201`), yêu cầu còn lại bị từ chối (`409 Conflict` hoặc `400 Bad Request`) và `stock` sau cùng bằng `0` (không âm). |
 
 ### 3.6. Nhóm 6: Thanh toán
@@ -245,3 +254,4 @@ endlegend
 | **NFR-10** | **Đóng gói Container & Khởi chạy độc lập** | Hệ thống được đóng gói bằng `Dockerfile` (cho cả `apps/web` và `apps/api`) và điều phối qua `docker-compose.yml` để khởi chạy đầy đủ 3 dịch vụ (`postgres`, `backend`, `frontend`). | **Must** | - Một người dùng mới clone repository, tạo `.env` từ `.env.example` và chạy `docker compose up --build` có thể truy cập Web (`http://localhost:3000`) và API (`http://localhost:3001`) hoạt động đầy đủ. |
 | **NFR-11** | **Tái tạo Database Migration & Idempotent Seed** | Cơ sở dữ liệu có cơ chế đồng bộ/migration schema Prisma và script `prisma/seed.ts` khởi tạo dữ liệu mẫu an toàn khi chạy nhiều lần. | **Must** | - Chạy `npm run db:seed` nhiều lần liên tiếp không tạo bản ghi danh mục, sản phẩm hoặc tài khoản mẫu bị trùng lặp. |
 | **NFR-12** | **Tự động hóa CI/CD, Health Check & Triển khai HTTPS** | Hệ thống cung cấp endpoint kiểm tra sức khỏe (`GET /health`), tích hợp pipeline CI/CD chạy `Install → Lint → Test → Build → Deploy` và phục vụ phiên bản production qua giao thức HTTPS. | **Must** | - Pull Request có lỗi lint, test hoặc build bị pipeline CI chặn merge tự động.<br>- Phiên bản production truy cập được qua URL `HTTPS` công khai và endpoint health check trả về HTTP `200`. |
+---
