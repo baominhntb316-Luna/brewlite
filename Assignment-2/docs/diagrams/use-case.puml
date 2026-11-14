@@ -1,0 +1,76 @@
+@startuml use-case-overview
+' BrewLite - Sơ đồ use-case tổng quát (Task 1.2)
+' Xuất SVG: plantuml -tsvg use-case-overview.puml
+
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+}
+skinparam actor {
+  BorderColor #333333
+}
+
+title BrewLite – Sơ đồ use-case tổng quát
+
+actor "Khách hàng" as Customer
+actor "Nhân viên quầy\n(Barista)" as Barista
+actor "Quản lý cửa hàng" as Manager
+actor "Payment Service\n(mô phỏng)" as Payment <<system>>
+
+rectangle "BrewLite" {
+
+  ' ----- Phạm vi MVP -----
+  usecase "UC-01\nĐặt và thanh toán đơn hàng" as UC01
+  usecase "UC-02\nXem menu, lọc & tìm kiếm" as UC02
+  usecase "UC-03\nXem chi tiết, chọn size/topping" as UC03
+  usecase "UC-04\nQuản lý giỏ hàng" as UC04
+  usecase "UC-05\nĐăng ký tài khoản" as UC05
+  usecase "UC-06\nĐăng nhập & xác thực JWT" as UC06
+  usecase "UC-07\nXem xác nhận, tiến trình\nvà lịch sử đơn" as UC07
+  usecase "UC-08\nHủy đơn & hoàn tồn kho" as UC08
+  usecase "UC-09\nCập nhật trạng thái đơn" as UC09
+  usecase "UC-10\nÁp mã khuyến mãi tại Checkout" as UC10
+  usecase "UC-11\nTích điểm thưởng Loyalty" as UC11
+
+  ' ----- Phạm vi mở rộng (màu xám) -----
+  usecase "UC-12\nGiao diện quản trị pha chế\nvà thực đơn" as UC12 #DDDDDD
+}
+
+' ----- Khách hàng -----
+Customer -- UC02
+Customer -- UC03
+Customer -- UC04
+Customer -- UC05
+Customer -- UC06
+Customer -- UC01
+Customer -- UC07
+Customer -- UC08
+
+' ----- Quan hệ giữa các use-case -----
+UC01 ..> UC06 : <<include>>
+UC10 ..> UC01 : <<extend>>
+UC11 ..> UC01 : <<extend>>
+
+' ----- Actor hệ thống bên ngoài -----
+UC01 -- Payment
+
+' ----- Barista và Quản lý -----
+Barista -- UC09
+Barista -- UC12
+Manager -- UC12
+
+note right of UC09
+  Backend (Order State Machine) thuộc MVP.
+  Giao diện Barista/Admin thuộc phạm vi
+  mở rộng.
+end note
+
+legend right
+  Nền trắng: thuộc MVP
+  Nền xám: phạm vi mở rộng (Extension)
+endlegend
+
+@enduml
