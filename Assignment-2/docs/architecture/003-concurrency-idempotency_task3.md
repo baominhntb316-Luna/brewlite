@@ -1,9 +1,5 @@
 # ADR 003: Chiến lược Xử lý Thanh toán Idempotent (Idempotency) & Tích điểm Thưởng (Loyalty)
 
-* **Trạng thái**: Accepted
-* **Ngày quyết định**: 2026-10-22
-* **Người phụ trách**: An + San 
-* **Liên kết yêu cầu**: FR-06 (Thanh toán Ví/Thẻ), FR-09 (Idempotent & Loyalty), NFR-02 (Bảo mật & Toàn vẹn dữ liệu), Task 10.2 & 10.4
 
 ---
 
