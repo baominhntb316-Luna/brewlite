@@ -1,9 +1,5 @@
 # ADR 001: Lựa chọn Mô hình Monorepo cho Dự án BrewLite
 
-* **Trạng thái**: Accepted
-* **Ngày quyết định**: 2026-10-20
-* **Người phụ trách**: Nhóm Kỹ thuật BrewLite
-* **Liên kết yêu cầu**: Task 4.1 (Thiết lập repository), Task 3.1 (Quyết định kiến trúc)
 
 ---
 
