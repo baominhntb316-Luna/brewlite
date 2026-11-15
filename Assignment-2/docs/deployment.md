@@ -3,7 +3,6 @@
 * **Dự án**: Hệ thống Đặt đồ uống trực tuyến BrewLite
 * **Môn học**: Công nghệ Phần mềm – Đại học Sài Gòn
 * **Phiên bản**: v2.0.0 (Release Assignment 2)
-* **Người thực hiện**: San + Minh (TV5 - Payment, Architecture & Deployment) & Nhóm BrewLite
 
 ---
 
@@ -18,7 +17,7 @@ Hệ thống được triển khai trên nền tảng Cloud đạt chuẩn HTTPS
 | **Health Check Endpoint** | Render Cloud Service | `https://api-brewlite.onrender.com/health` | HTTPS (Port 443) |
 | **Managed Database** | PostgreSQL 16 (Render/Neon) | Kết nối nội bộ qua chuỗi `DATABASE_URL` | PostgreSQL (Port 5432 - Private Network) |
 
-> 🔒 **Chính sách Bảo mật Cơ sở Dữ liệu**: CSDL PostgreSQL Production **tuyệt đối không mở cổng công khai ra ngoài Internet**. Chỉ có Docker Container của Backend API mới được cấp quyền truy cập thông qua Private Network Connection String. Mọi mật khẩu và chuỗi kết nối nhạy cảm đều được lưu trong Cloud Environment Secrets, không commit vào kho Git.
+>  **Chính sách Bảo mật Cơ sở Dữ liệu**: CSDL PostgreSQL Production **tuyệt đối không mở cổng công khai ra ngoài Internet**. Chỉ có Docker Container của Backend API mới được cấp quyền truy cập thông qua Private Network Connection String. Mọi mật khẩu và chuỗi kết nối nhạy cảm đều được lưu trong Cloud Environment Secrets, không commit vào kho Git.
 
 ---
 
