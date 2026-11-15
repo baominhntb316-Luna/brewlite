@@ -1,9 +1,5 @@
 # ADR 002: Lựa chọn PostgreSQL và Prisma ORM cho Tầng Dữ liệu
 
-* **Trạng thái**: Accepted
-* **Ngày quyết định**: 2026-10-21
-* **Người phụ trách**: Nhóm Kỹ thuật BrewLite
-* **Liên kết yêu cầu**: Task 1.1, Task 3.1, NFR-02 (Toàn vẹn dữ liệu)
 
 ---
 
