@@ -13,7 +13,7 @@ Hệ thống BrewLite xử lý các giao dịch kinh doanh đồ uống bao gồ
 
 ## 3. Quyết định (Decision)
 Nhóm thống nhất sử dụng **PostgreSQL 16** và **Prisma ORM**:
-* Định nghĩa schema tập trung trong `prisma/schema.prisma` với 7 mô hình dữ liệu chính: `User`, `Product`, `Order`, `OrderItem`, `Payment`, `Promotion`, `LoyaltyTransaction`.
+* Định nghĩa schema tập trung trong `prisma/schema.prisma` với 8 mô hình dữ liệu chính: `User`, `Product`, `Order`, `OrderItem`, `Category`, `Payment`, `Promotion`, `LoyaltyTransaction`.
 * Sử dụng **Prisma Migrate** để tạo và đồng bộ hóa lịch sử thay đổi schema vào git (`prisma/migrations`).
 * Sử dụng **Prisma Interactive Transactions** (`prisma.$transaction`) để bảo vệ các thao tác nhạy cảm: thanh toán idempotent, trừ kho đồng thời.
 

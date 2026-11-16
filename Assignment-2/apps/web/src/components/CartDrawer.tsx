@@ -105,7 +105,7 @@ export default function CartDrawer() {
               onClick={handleCheckout}
               className="w-full bg-[#1B4332] hover:bg-[#143325] text-white font-semibold py-3.5 px-5 rounded-2xl shadow-md flex items-center justify-center gap-2 transition"
             >
-              <span>Thanh toán ({formatVND(subtotal)})</span>
+              <span>Đặt đơn({formatVND(subtotal)})</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
